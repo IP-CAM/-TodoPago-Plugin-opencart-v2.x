@@ -14,6 +14,7 @@ class ControllerPaymentTodopago extends Controller {
     }
 
     public function index() {
+        $data["formulario"] = $this->config->get('todopago_formulario');
         $this->load->language('payment/todopago');
         $this->load->model('todopago/transaccion');
         $this->load->model('payment/todopago');
@@ -115,7 +116,10 @@ class ControllerPaymentTodopago extends Controller {
                     $query = $this->model_todopago_transaccion->recordFirstStep($this->order_id, $paramsSAR, $rta_first_step, $rta_first_step['RequestKey'], $rta_first_step['PublicRequestKey']);
                     $this->logger->debug('query recordFiersStep(): '.$query);
                     $this->model_checkout_order->addOrderHistory($this->order_id, $this->config->get('todopago_order_status_id_pro'), "TODO PAGO: ".$rta_first_step['StatusMessage']);
-                    header('Location: '.$rta_first_step['URL_Request']);
+                    if ($this->config->get('todopago_formulario')=="hibrid"){
+                    echo json_encode($rta_first_step);} else {header('Location: '.$rta_first_step['URL_Request']);}
+                    
+                    
                     //$this->response->redirect($rta_first_step['URL_Request']);
                 }
                 else{
@@ -304,4 +308,6 @@ class ControllerPaymentTodopago extends Controller {
         $mode = ($this->get_mode()=="test")?"test":"prod";
         $this->logger = loggerFactory::createLogger(true, $mode, $this->order['customer_id'], $this->order['order_id']);
     }
+
+    
 }

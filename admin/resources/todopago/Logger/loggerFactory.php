@@ -13,7 +13,7 @@ class loggerFactory{
         $logger->setLevels(TP_LOG_LEVEL, 'fatal');
 
         if($payment){
-            $endpoint = ($mode=='prod')? TODOPAGO_ENDPOINT_PROD:TODOPAGO_ENDPOINT_TEST;
+            $endpoint = ($mode=='prod')? 'TODOPAGO_ENDPOINT_PROD':'TODOPAGO_ENDPOINT_TEST';
             $logger->setEndPoint($endpoint);
             $logger->setCustomer($customer);
             $logger->setOrder($order);

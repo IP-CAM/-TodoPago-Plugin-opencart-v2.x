@@ -128,6 +128,19 @@
 
 
                             </div>
+                            <!--<div class="form-group required">
+                                <label class="col-sm-2 control-label" for="todopago_formulario">Modo test o Producción</label>
+                                <div class="field col-sm-5">
+                                    <select class="form-control" name="todopago_formulario" id="todopago_formulario">
+                                        <option value="redirec" <?php if ($todopago_formulario=="redirec" ){ ?> selected='selected' <?php } ?>>Redirección</option>
+                                        <option value="hibrid" <?php if ($todopago_formulario=="hibrid" ){ ?>selected='selected'<?php } ?>>Híbrido</option>
+                                    </select>
+                                </div>
+                                <div class="info-field col-sm-5"><em>* descripción aca</em>
+                                </div>
+
+
+                            </div>-->
                         </div>
                         <!-- END TAB GENERAL-->
 
@@ -283,6 +296,7 @@
                                             tabla_db += "<th>" + value.lastname + "</th>";
                                             tabla_db += "<th>" + value.store_name + "</th>";
                                             tabla_db += "<th>$" + value.total + "</th>";
+                                            tabla_db += "<th><a onclick='devolver(" + value.order_id + ")' style='cursor:pointer'>Devolver</a></th>";
                                             tabla_db += "</tr>";
                                         });
 
@@ -304,6 +318,7 @@
                                         $('#content').css('cursor', 'auto');
                                         alert(datos);
                                     }
+
                                 </script>
                                 <link rel="stylesheet" href="http://cdn.datatables.net/1.10.2/css/jquery.dataTables.css">
                                 <table id="tabla" class="display" cellspacing="0" width="100%">
@@ -316,6 +331,7 @@
                                             <th>Apellido</th>
                                             <th>Tienda</th>
                                             <th>Total</th>
+                                            <th>devolucion</th>
                                         </tr>
                                     </thead>
 
@@ -327,6 +343,7 @@
                                             <th>Apellido</th>
                                             <th>Tienda</th>
                                             <th>Total</th>
+                                            <th>devolucion</th>
                                         </tr>
                                     </tfoot>
 
@@ -339,10 +356,28 @@
                 </form>
             </div>
         </div>
-
         <script type="text/javascript">
             <!--
             $('#htabs a').tabs();
+            
+            function devolver(order_id){
+               var monto = prompt("Monto a Devolver: ", "ej: 1.23");
+               
+               $('#content').css('cursor', 'progress');
+               var url_devolver = '<?php echo $url_devolver ?>';
+               $.post(url_devolver,{order_id: order_id, monto: monto}, llegadaDatosDevolucion );
+               return false;
+         }   
+            function devolver_total(order_id){
+                alert("devolucion total!");
+                $.post();
+            }
+
+            function llegadaDatosDevolucion(datos) {
+                                        $('#content').css('cursor', 'auto');
+                                        alert(datos);
+                                    }
+
             //-->
         </script>
         <?php echo $footer; ?>
