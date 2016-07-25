@@ -1,3 +1,79 @@
+<style type="text/css">
+    #popup {
+        left: 0;
+        position: absolute;
+        top: 0;
+        width: 100%;
+        z-index: 1001;
+    }
+    
+    #popup_prod {
+        left: 0;
+        position: absolute;
+        top: 0;
+        width: 100%;
+        z-index: 1001;
+    }
+    
+    .content-popup {
+        margin: 0px auto;
+        margin-top: 130px;
+        position: relative;
+        padding: 10px;
+        width: 400px;
+        height: 300px;
+        border-radius: 4px;
+        background-color: #FFFFFF;
+        box-shadow: 0 2px 5px #666666;
+    }
+    
+    .content-popup h2 {
+        color: #48484B;
+        border-bottom: 1px solid #48484B;
+        margin-top: 0;
+        padding-bottom: 4px;
+    }
+    
+    .popup-overlay {
+        left: 0;
+        position: absolute;
+        top: 0;
+        width: 100%;
+        z-index: 999;
+        display: none;
+        background-color: #777777;
+        cursor: pointer;
+        opacity: 0.7;
+    }
+    
+    .close {
+        positio#logon: absolute;
+        right: 15px;
+    }
+    
+    .content-popup img {
+        position: relative;
+        align-self: right;
+    }
+    
+    .content-popup button {
+        position: relative;
+        left: 25px;
+        bottom: 50px;
+    }
+    
+    .content-popup #cancel {
+        position: relative;
+        left: 105px;
+        bottom: 237px;
+    }
+    
+    .content-popup #cancel_prod {
+        position: relative;
+        left: 105px;
+        bottom: 237px;
+    }
+</style>
 <?php echo $header; ?>
 <?php echo $column_left; ?>
 <div id="content">
@@ -128,7 +204,7 @@
 
 
                             </div>
-                            <!--<div class="form-group required">
+                            <div class="form-group required">
                                 <label class="col-sm-2 control-label" for="todopago_formulario">Modo test o Producción</label>
                                 <div class="field col-sm-5">
                                     <select class="form-control" name="todopago_formulario" id="todopago_formulario">
@@ -138,9 +214,45 @@
                                 </div>
                                 <div class="info-field col-sm-5"><em>* descripción aca</em>
                                 </div>
+ <p>                         </div>
+
+</p> 
+        
+                  <div class="form-group required">
+                         <label class="col-sm-2 control-label" for="todopago_maxinstallments">Máximo de cuotas</label>
+                               <div class="field col-sm-1">
+                            <div class="checkbox">
+                                       <?php    if (isset($todopago_maxinstallments)){ ?>
+                         
+                                   <label><input type="checkbox" id="habilitar" value="" checked="checked"> Habilitar</label>
+                       
+                             <?php }else {?>
+                              <label><input type="checkbox" id="habilitar" value=""> Habilitar</label>
+                              <?php } ?>
+                        </div>
+                      </div>
+                                <div class="field col-sm-4">
+                                    <select class="form-control" name="todopago_maxinstallments" id="todopago_maxinstallments" disabled>
+                        <?php  
+                    for ($i = 0; $i <= 12; $i++) {
+              
+                                 ?>   <option value="<?php echo $i ?>"><?php echo $i ?></option> <?php
+
+                              if ($i == $todopago_maxinstallments) {
+?><script> $("select option[value=<?php echo $i ?>]").attr("selected","selected"); </script><?php
+                                            }
 
 
-                            </div>-->
+                   }
+                    ?>                             
+                                  
+                                    </select>
+                                </div>
+              
+                                <div class="info-field col-sm-5"><em>* Seleccione la cantidad máxmia de cuotas</em>
+                                </div>
+                            </div>
+        
                         </div>
                         <!-- END TAB GENERAL-->
 
@@ -170,6 +282,30 @@
                                 <div class="info-field col-sm-5"><em>Código provisto por Todo Pago</em>
                                 </div>
                             </div>
+                            <div class="form-group required">
+                                <div class="col-sm-2"></div>
+                                <div class="field col-sm-4">
+                                    <button type="button" id="open" class="btn btn-primary">Requerir datos</button>
+                                    <button type="button" id="borrar" class="btn btn-primary">Borrar</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="popup" style="display: none;">
+                            <div class="content-popup">
+
+                                <div>
+                                    <h2>Obtener credenciales <img src="http://www.todopago.com.ar/sites/todopago.com.ar/files/logo.png"></h2>
+
+                                    <br />
+                                    <label class="control-label">E-mail</label>
+                                    <input id="mail" class="form-control" name="mail" type="email" value="" placeholder="E-mail" />
+                                    <label class="control-label">Contrase&ntilde;a</label>
+                                    <input id="pass" class="form-control" name="pass" type="password" value="" placeholder="Contrase&ntilde;a" />
+                                    <button id="confirm_test" style="margin:20%;" class="btn-config-credentials btn btn-primary">Acceder</button>
+                                    <button id="cancel" style="margin:20%;" class="btn-config-credentials btn btn-danger">Cancelar</button>
+                                </div>
+                            </div>
                         </div>
                         <!-- END TAB AMBIENTE TEST -->
 
@@ -197,6 +333,30 @@
                                     <input type="text" class="form-control" name="todopago_securityproduccion" id="todopago_securityproduccion" value="<?php echo $todopago_securityproduccion; ?>" />
                                 </div>
                                 <div class="info-field col-sm-5"><em>Código provisto por Todo Pago</em>
+                                </div>
+                            </div>
+                            <div class="form-group required">
+                                <div class="col-sm-2"></div>
+                                <div class="field col-sm-4">
+                                    <button type="button" id="open_prod" class="btn btn-primary">Requerir datos</button>
+                                    <button type="button" id="borrar_prod" class="btn btn-primary">Borrar</button>
+                                </div>
+                            </div>
+                        </div>
+
+                         <div id="popup_prod" style="display: none;">
+                            <div class="content-popup">
+
+                                <div>
+                                    <h2>Obtener credenciales <img src="http://www.todopago.com.ar/sites/todopago.com.ar/files/logo.png"></h2>
+
+                                    <br />
+                                    <label class="control-label">E-mail</label>
+                                    <input id="mail_prod" class="form-control" name="mail" type="email" value="" placeholder="E-mail" />
+                                    <label class="control-label">Contrase&ntilde;a</label>
+                                    <input id="pass_prod" class="form-control" name="pass" type="password" value="" placeholder="Contrase&ntilde;a" />
+                                    <button id="confirm_prod" style="margin:20%;" class="btn-config-credentials btn btn-primary">Acceder</button>
+                                    <button id="cancel_prod" style="margin:20%;" class="btn-config-credentials btn btn-danger">Cancelar</button>
                                 </div>
                             </div>
                         </div>
@@ -380,4 +540,111 @@
 
             //-->
         </script>
+        <script type="text/javascript">
+            $(document).ready(function() {
+                $('#open').click(function() {
+
+                    $('#popup').fadeIn('slow');
+                    $('.popup-overlay').fadeIn('slow');
+                    $('.popup-overlay').height($(window).height());
+                    //return false;
+                });
+
+                $('#confirm_test').click(function() {
+
+                    $.post("view/template/payment/todopago_credentials.php", {
+                    mail: $("#mail").val(),
+                    pass: $("#pass").val(),
+                    tab: "test"
+                }, function(data) {
+                  json_data = JSON.parse(data);
+                  console.log(json_data);
+                  $('input:text[name=todopago_authorizationHTTPtest]').val(json_data.Credentials.APIKey);
+                  $('input:text[name=todopago_idsitetest]').val(json_data.Credentials.merchantId);
+
+                });
+                    $('#popup').fadeOut('slow');
+                    $('.popup-overlay').fadeOut('slow');
+                    return false;
+                });
+                $('#cancel').click(function() {
+                    $('#popup').fadeOut('slow');
+                    $('.popup-overlay').fadeOut('slow');
+                    return false;
+                });
+                $('#borrar').click(function() {
+                    $('input:text[name=todopago_authorizationHTTPtest]').val('');
+                    $('input:text[name=todopago_idsitetest]').val('');
+                    $('input:text[name=todopago_securitytest]').val('');
+                });
+            });
+        </script>
+        <script type="text/javascript">
+            $(document).ready(function() {
+                $('#open_prod').click(function() {
+
+                    $('#popup_prod').fadeIn('slow');
+                    $('.popup-overlay').fadeIn('slow');
+                    $('.popup-overlay').height($(window).height());
+                    //return false;
+                });
+
+                $('#confirm_prod').click(function() {
+
+                    $.post("view/template/payment/todopago_credentials.php", {
+                    mail: $("#mail").val(),
+                    pass: $("#pass").val(),
+                    tab: "prod"
+                }, function(data) {
+                  json_data = JSON.parse(data);
+                  console.log(json_data);
+                  $('input:text[name=todopago_authorizationHTTPproduccion]').val(json_data.Credentials.APIKey);
+                  $('input:text[name=todopago_idsiteproduccion]').val(json_data.Credentials.merchantId);
+
+                });
+
+                    $('#popup_prod').fadeOut('slow');
+                    $('.popup-overlay').fadeOut('slow');
+                    return false;
+                });
+                $('#cancel_prod').click(function() {
+                    $('#popup_prod').fadeOut('slow');
+                    $('.popup-overlay').fadeOut('slow');
+                    return false;
+                });
+                $('#borrar_prod').click(function() {
+                    $('input:text[name=todopago_authorizationHTTPproduccion]').val('');
+                    $('input:text[name=todopago_idsiteproduccion]').val('');
+                    $('input:text[name=todopago_securityproduccion]').val('');
+                });
+            });
+        </script>
         <?php echo $footer; ?>
+      
+        <script>
+
+
+$(document).ready(function(){
+         if ($('#habilitar').attr('checked')) {
+            $("#todopago_maxinstallments").removeAttr("disabled");
+                                 }else{
+                                  $("#todopago_maxinstallments").val("0");   
+                                     
+                                 }
+    $("#habilitar").click(function() {  
+
+if ($('#habilitar').prop('checked')) {
+
+  $("#todopago_maxinstallments").removeAttr("disabled");
+
+
+}else
+    {
+             $("#todopago_maxinstallments").prop('disabled', true);  
+          $("#todopago_maxinstallments").val(""); 
+
+    }
+     
+    });        
+    });        
+            </script>

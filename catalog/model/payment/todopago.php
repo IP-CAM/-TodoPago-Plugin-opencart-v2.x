@@ -32,7 +32,6 @@ public function setLogger($logger){
 
     public function getSku($productId){
         $query = "SELECT sku from ".DB_PREFIX."product WHERE product_id = ".$productId.";";
-        $this->logger->debug("SKU query: ".$query);
 
         $queryResult = $this->db->query($query);
 
@@ -45,7 +44,6 @@ public function setLogger($logger){
       //$productCode = $this->getAttribute($productId, "codigo del producto");
 
       $query = "SELECT c.name AS category FROM ".DB_PREFIX."product AS p INNER JOIN ".DB_PREFIX."product_to_category as pc ON p.product_id = pc.product_id INNER JOIN ".DB_PREFIX."category_description AS c ON pc.category_id = c.category_id WHERE p.product_id = ".$productId.";";
-      $this->logger->debug("query productCode: ".$query);
       $result = $this->db->query($query);
       $productCode = $result->row['category'];
 

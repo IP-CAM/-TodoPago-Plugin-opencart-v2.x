@@ -7,6 +7,8 @@ Plug in para la integración con gateway de pago <strong>Todo Pago</strong>
 - [Instalación](#instalacion)
 - [Configuración](#configuracion)
  - [Configuración plug in](#confplugin)
+ - [Formulario Hibrido](#formHibrido)
+ - [Obtener datos de configuracion](#getcredentials)
 - [Datos adiccionales para prevención de fraude](#PrevencionFraude)
 - [Consulta de transacciones](#constrans)
 - [Devoluciones](#devoluciones)
@@ -56,6 +58,19 @@ Para llegar al menu de configuración ir a: <em>System->Configuration</em> y sel
 Una vez instalado el plug in, ir a 'extensions->payments' y ir a la opción Todo Pago, hacer click en el lápiz, para comenzar a configurar.
 La configuracion del Plug in esta dividido en 5 solapas (GENERAL, AMBIENTE TEST, AMBIENTE PRODUCCION, ESTADO DEL PEDIDO) y una solapa adiccional (Status de la Operación) que se utiliza para ver el estado de la orden (transacción) de manera on line.
 ![imagen de solapas de configuracion](https://raw.githubusercontent.com/TodoPago/imagenes/master/README.img/opencart2_conf_solapas.PNG)
+
+[Formulario Hibrido](#formHibrido).
+<a name="formHibrido"></a>
+####Formulario Híbrido
+En la versión 1.7 del Plugin se incluyen dos tipos de formularios de pago, redirección y Formulario Híbrido (embebido en el e commerce). Para utilizar este último se debe seleccionar Híbrido en la configuración geneeral delPlugin. 
+![imagen de solapas de configuracion](https://raw.githubusercontent.com/TodoPago/imagenes/master/opencart20/Selección_015.png)
+
+[Obtener datos de configuracion](#getcredentials).
+<a name="getcredentials"></a>
+####Obtener datos de configuracion
+En el popup loguearse con el mail y password de Todopago. Los datos se cargaran automaticamente en los campos Authorization HTTP y Id Site Todo Pago code en el ambiente correspondiente (Desarrollo o produccion ) y solo hay que hacer click en el boton guardar datos y listo.
+![imagen de solapas de configuracion](https://raw.githubusercontent.com/TodoPago/imagenes/master/opencart15/Selecci%C3%B3n_016.png)
+
 
 <sub><em>Menú principal</em></sub>
 

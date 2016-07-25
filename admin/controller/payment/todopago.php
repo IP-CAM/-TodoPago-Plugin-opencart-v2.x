@@ -90,18 +90,24 @@ public function install(){
                     break;
                 }
                 case "1.1.0":
-                    $this->logger->debug("Upgrade to v1.1.0");
-                case "1.2.0":
                     $this->logger->debug("Upgrade to v1.2.0");
-                case "1.3.0":
+                case "1.2.0":
                     $this->logger->debug("Upgrade to v1.3.0");
-                case "1.4.0":
+                case "1.3.0":
                     $this->logger->debug("Upgrade to v1.4.0");
-                case "1.5.0":
+                case "1.4.0":
                     $this->logger->debug("Upgrade to v1.5.0");
+                case "1.5.0":
+                    $this->logger->debug("Upgrade to v1.6.0");
+                case "1.6.0":
+                    $this->logger->debug("Upgrade to v1.7.0");
+                case "1.7.0":
+                    $this->logger->debug("Upgrade to v1.8.0");
+                case "1.8.0":
                     
-                    $this->logger->info("Plugin instalado/upgradeado");
+                   $this->logger->info("Plugin instalado/upgradeado");
                 }
+             
                 if ($errorMessage == null){
                     if ($action == self::UPGRADE){
                         $this->session->data['success'] = 'Upgrade finalizado.';
@@ -291,6 +297,12 @@ public function install(){
       } else {
           $data['todopago_formulario'] = $this->config->get('todopago_formulario');
       }
+        
+      if (isset($this->request->post['todopago_maxinstallments'])){
+          $data['todopago_maxinstallments'] = $this->request->post['todopago_maxinstallments'];
+      } else {
+          $data['todopago_maxinstallments'] = $this->config->get('todopago_maxinstallments');
+      }
 
     //datos para tags ambiente test
       if (isset($this->request->post['todopago_authorizationHTTPtest'])) {
@@ -448,7 +460,8 @@ public function get_status()
         if ($status){
             foreach ($status['Operations'] as $key => $value) {
                 if(!is_array($value)){
-                    $rta .= "$key: $value \n";
+	 	    $complete_value = json_encode($value);
+                    $rta .= "$key: ($complete_value) \n";
                 }
             }
         } else {

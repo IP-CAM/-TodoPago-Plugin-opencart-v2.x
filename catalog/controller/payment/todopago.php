@@ -14,6 +14,8 @@ class ControllerPaymentTodopago extends Controller {
     }
 
     public function index() {
+        $data["ambiente"]= $this->get_mode();
+        $data["url_second_step"]= $this->config->get('config_url')."index.php?route=payment/todopago/second_step_todopago";
         $data["formulario"] = $this->config->get('todopago_formulario');
         $this->load->language('payment/todopago');
         $this->load->model('todopago/transaccion');
@@ -29,11 +31,28 @@ class ControllerPaymentTodopago extends Controller {
             $data['order_id'] = $order_info['order_id'];
 
             $this->model_payment_todopago->editPaymentMethodOrder($data['order_id']);
+        if($data["formulario"]!="hibrid"){
             if (file_exists(DIR_TEMPLATE.$this->config->get('config_template').'/template/payment/todopago.tpl')){
                 $this->template = $this->config->get('config_template') . '/template/payment/todopago.tpl';
             } else {
                 $this->template = 'default/template/payment/todopago.tpl';
             }
+        
+            //$this->load->view('payment/pp_express_confirm', $data)
+        }else{
+           
+         if(VERSION < '2.2.0.0'){
+               if (file_exists(DIR_TEMPLATE.$this->config->get('config_template').'/template/payment/todopago_form.tpl')){
+                $this->template = $this->config->get('config_template') . '/template/payment/todopago_form.tpl';
+            } else {
+                $this->template = 'default/template/payment/todopago_form.tpl';
+            }
+         } else {
+             $this->template = 'payment/todopago_form.tpl';
+         }
+          
+        }
+
             $data['action'] = $this->config->get('config_url')."index.php?route=payment/todopago/first_step_todopago";
             return $this->load->view($this->template, $data);
         }
@@ -252,7 +271,10 @@ class ControllerPaymentTodopago extends Controller {
         $paydata_operation['AMOUNT'] = number_format($this->order['total'], 2, ".", "");
         $paydata_operation['CURRENCYCODE'] = "032";
         $paydata_operation['EMAILCLIENTE'] = $this->order['email'];
-
+      $var = $this->config->get('todopago_maxinstallments');
+         if($var != null){
+          $paydata_operation['MAXINSTALLMENTS'] = $this->config->get('todopago_maxinstallments');
+         }
         $paydata_operation = array_merge($paydata_operation, $controlFraude);
 
            $this->logger->debug("Paydata operación: ".json_encode($paydata_operation));
