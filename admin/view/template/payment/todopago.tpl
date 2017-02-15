@@ -137,19 +137,19 @@
                                 <div class="field col-sm-5">
                                     <select class="form-control" name="todopago_status" id="todopago_status">
                                         <?php if ($todopago_status) { ?>
-                                        <option value="1" selected="selected">
-                                            <?php echo $text_enabled; ?>
-                                        </option>
-                                        <option value="0">
-                                            <?php echo $text_disabled; ?>
-                                        </option>
+                                            <option value="1" selected="selected">
+                                                <?php echo $text_enabled; ?>
+                                            </option>
+                                            <option value="0">
+                                                <?php echo $text_disabled; ?>
+                                            </option>
                                         <?php } else { ?>
-                                        <option value="1">
-                                            <?php echo $text_enabled; ?>
-                                        </option>
-                                        <option value="0" selected="selected">
-                                            <?php echo $text_disabled; ?>
-                                        </option>
+                                            <option value="1">
+                                                <?php echo $text_enabled; ?>
+                                            </option>
+                                            <option value="0" selected="selected">
+                                                <?php echo $text_disabled; ?>
+                                            </option>
                                         <?php } ?>
                                     </select>
                                 </div>
@@ -186,7 +186,7 @@
                             <div class="form-group">
                                 <label class="col-sm-2 control-label" for="todopago_deadline">Dead Line</label>
                                 <div class="field col-sm-5">
-                                    <input type="number" class="form-control" name="todopago_deadline" id="todopago_deadline" value="<?php echo $todopago_deadline; ?>" />
+                                    <input type="number" min="0" class="form-control" name="todopago_deadline" id="todopago_deadline" value="<?php echo $todopago_deadline; ?>" />
                                 </div>
                                 <div class="info-field col-sm-5"><em>Días máximos para la entrega</em>
                                 </div>
@@ -199,20 +199,20 @@
                                         <option value="prod" <?php if ($todopago_modotestproduccion=="prod" ){ ?>selected='selected'<?php } ?>>Produccion</option>
                                     </select>
                                 </div>
-                                <div class="info-field col-sm-5"><em>Debe ser cofigurado en CONFIGURACION - AMBIENTE TEST / PRODUCCION</em>
+                                <div class="info-field col-sm-5"><em>Debe ser configurado en CONFIGURACION - AMBIENTE TEST / PRODUCCION</em>
                                 </div>
 
 
                             </div>
                             <div class="form-group required">
-                                <label class="col-sm-2 control-label" for="todopago_formulario">Modo test o Producción</label>
+                                <label class="col-sm-2 control-label" for="todopago_formulario">Tipo de formulario que desea utilizar</label>
                                 <div class="field col-sm-5">
                                     <select class="form-control" name="todopago_formulario" id="todopago_formulario">
                                         <option value="redirec" <?php if ($todopago_formulario=="redirec" ){ ?> selected='selected' <?php } ?>>Redirección</option>
                                         <option value="hibrid" <?php if ($todopago_formulario=="hibrid" ){ ?>selected='selected'<?php } ?>>Híbrido</option>
                                     </select>
                                 </div>
-                                <div class="info-field col-sm-5"><em>* descripción aca</em>
+                                <div class="info-field col-sm-5"><em>Puede usar un formulario integrado al comercio o redireccionar al formulario externo</em>
                                 </div>
  <p>                         </div>
 
@@ -249,7 +249,7 @@
                                     </select>
                                 </div>
               
-                                <div class="info-field col-sm-5"><em>* Seleccione la cantidad máxmia de cuotas</em>
+                                <div class="info-field col-sm-5"><em>* Seleccione la cantidad máxima de cuotas</em>
                                 </div>
                             </div>
         
@@ -518,30 +518,25 @@
         </div>
         <script type="text/javascript">
             <!--
-            $('#htabs a').tabs();
-            
-            function devolver(order_id){
-               var monto = prompt("Monto a Devolver: ", "ej: 1.23");
-               
-               $('#content').css('cursor', 'progress');
-               var url_devolver = '<?php echo $url_devolver ?>';
-               $.post(url_devolver,{order_id: order_id, monto: monto}, llegadaDatosDevolucion );
-               return false;
-         }   
-            function devolver_total(order_id){
-                alert("devolucion total!");
-                $.post();
-            }
+                function devolver(order_id){
+                   var monto = prompt("Monto a Devolver o vacío para devolución total (ej: 1.23): ", "");
+                   if (monto !== null) {
+                        $('#content').css('cursor', 'progress');
+                        var url_devolver = '<?php echo $url_devolver ?>';
+                        $.post(url_devolver,{order_id: order_id, monto: monto}, llegadaDatosDevolucion );
+                    }
+                   return false;
+                }   
 
-            function llegadaDatosDevolucion(datos) {
-                                        $('#content').css('cursor', 'auto');
-                                        alert(datos);
-                                    }
-
+                function llegadaDatosDevolucion(datos) {
+                    $('#content').css('cursor', 'auto');
+                    alert(datos);
+                }
             //-->
         </script>
         <script type="text/javascript">
             $(document).ready(function() {
+
                 $('#open').click(function() {
 
                     $('#popup').fadeIn('slow');
@@ -552,16 +547,22 @@
 
                 $('#confirm_test').click(function() {
 
-                    $.post("view/template/payment/todopago_credentials.php", {
+                    $.post("view/template/<?php echo $extension; ?>payment/todopago_credentials.php", {
                     mail: $("#mail").val(),
                     pass: $("#pass").val(),
-                    tab: "test"
+                    ambiente: "test"
                 }, function(data) {
-                  json_data = JSON.parse(data);
-                  console.log(json_data);
-                  $('input:text[name=todopago_authorizationHTTPtest]').val(json_data.Credentials.APIKey);
-                  $('input:text[name=todopago_idsitetest]').val(json_data.Credentials.merchantId);
-
+                    $("#mail").val('');
+                    $("#pass").val('');
+                    json_data = JSON.parse(data);
+                    console.log(json_data);
+                    if(json_data.codigoResultado === 0) {
+                        $('input:text[name=todopago_authorizationHTTPtest]').val(json_data.apikey);
+                        $('input:text[name=todopago_idsitetest]').val(json_data.merchandid);
+                        $('input:text[name=todopago_securitytest]').val(json_data.security);
+                    } else {
+                        alert(json_data.mensajeResultado);
+                    }
                 });
                     $('#popup').fadeOut('slow');
                     $('.popup-overlay').fadeOut('slow');
@@ -591,16 +592,22 @@
 
                 $('#confirm_prod').click(function() {
 
-                    $.post("view/template/payment/todopago_credentials.php", {
-                    mail: $("#mail").val(),
-                    pass: $("#pass").val(),
-                    tab: "prod"
+                    $.post("view/template/<?php echo $extension; ?>payment/todopago_credentials.php", {
+                    mail: $("#mail_prod").val(),
+                    pass: $("#pass_prod").val(),
+                    ambiente: "prod"
                 }, function(data) {
-                  json_data = JSON.parse(data);
-                  console.log(json_data);
-                  $('input:text[name=todopago_authorizationHTTPproduccion]').val(json_data.Credentials.APIKey);
-                  $('input:text[name=todopago_idsiteproduccion]').val(json_data.Credentials.merchantId);
-
+                    $("#mail_prod").val('');
+                    $("#pass_prod").val('');
+                    json_data = JSON.parse(data);
+                    console.log(json_data);
+                    if(json_data.codigoResultado === 0) {
+                        $('input:text[name=todopago_authorizationHTTPproduccion]').val(json_data.apikey);
+                        $('input:text[name=todopago_idsiteproduccion]').val(json_data.merchandid);
+                        $('input:text[name=todopago_securityproduccion]').val(json_data.security);
+                    } else {
+                        alert(json_data.mensajeResultado);
+                    }
                 });
 
                     $('#popup_prod').fadeOut('slow');
@@ -617,6 +624,12 @@
                     $('input:text[name=todopago_idsiteproduccion]').val('');
                     $('input:text[name=todopago_securityproduccion]').val('');
                 });
+                
+                var todopago_status = '<?php echo $todopago_status ?>';
+                if(todopago_status == 1){
+                    $('#todopago_status').val('1');
+                }
+
             });
         </script>
         <?php echo $footer; ?>

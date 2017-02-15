@@ -130,7 +130,9 @@ curl_close ($ch);
 				<input type="button" class="btn btn-primary" id="MY_btnConfirmarPago" class="button" value="Pagar"/>
 		</div>
 	
-		
+		<div  class="pull-right">
+				<input type="button" class="btn btn-primary" id="MY_btnPagarConBilletera" class="button" value="Pagar con Billetera"/>
+		</div>
 </div>
 
 	<script>
@@ -140,8 +142,8 @@ curl_close ($ch);
 
 		//securityRequesKey, esta se obtiene de la respuesta del SAR
 		var security = "<?php echo $rta_server->PublicRequestKey; ?>";
-		var mail = "";
-		var completeName = "";
+		var mail = "<?php echo $mail; ?>";
+		var completeName = "<?php echo $completeName; ?>";
 		var dni = '';
 		var defDniType = 'DNI'
 			
@@ -149,6 +151,7 @@ curl_close ($ch);
 		function todopago_init_form()
 			{window.TPFORMAPI.hybridForm.initForm({
 			callbackValidationErrorFunction: 'validationCollector',
+			callbackBilleteraFunction: 'billeteraPaymentResponse',
             callbackCustomSuccessFunction: 'customPaymentSuccessResponse',
             callbackCustomErrorFunction: 'customPaymentErrorResponse',
             botonPagarId: 'MY_btnConfirmarPago',
@@ -181,6 +184,12 @@ curl_close ($ch);
 			window.location.href = "<?php echo $url_second_step.'&Order='.$order_id.'&Answer=' ?>"+response.AuthorizationKey;
 		}
 		
+		function billeteraPaymentResponse(response) {
+			console.log("My wallet callback");
+			console.log(response.ResultCode + " : " + response.ResultMessage);
+            window.location.href = "<?php echo $url_second_step.'&Order='.$order_id.'&Answer=' ?>"+response.AuthorizationKey;
+		}
+
 		function customPaymentErrorResponse(response) {
 			console.log("Mi custom payment error callback");
 			console.log(response.ResultCode + " : " + response.ResultMessage);

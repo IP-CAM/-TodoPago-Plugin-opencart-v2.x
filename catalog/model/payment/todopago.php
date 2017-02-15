@@ -44,8 +44,9 @@ public function setLogger($logger){
       //$productCode = $this->getAttribute($productId, "codigo del producto");
 
       $query = "SELECT c.name AS category FROM ".DB_PREFIX."product AS p INNER JOIN ".DB_PREFIX."product_to_category as pc ON p.product_id = pc.product_id INNER JOIN ".DB_PREFIX."category_description AS c ON pc.category_id = c.category_id WHERE p.product_id = ".$productId.";";
-      $result = $this->db->query($query);
-      $productCode = $result->row['category'];
+      $result = $this->db->query($query)->row;
+
+      $productCode = array_key_exists('category', $result) ? $result['category'] : "default";
 
       return ($productCode != null)? $productCode : "default"; //Si no tiene categoría asignada, devueelve default.
   }

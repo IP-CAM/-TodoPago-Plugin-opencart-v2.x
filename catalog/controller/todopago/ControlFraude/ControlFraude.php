@@ -61,9 +61,15 @@ abstract class Controlfraude{
 		$this->logger->debug(" CSBTPHONENUMBER - Tel&eacute;fono del usuario al que se le emite la factura. No utilizar guiones, puntos o espacios. Incluir c&oacute;digo de pa&iacute;s");
 		$payDataOperacion ['CSBTPHONENUMBER'] = phone::clean($this->getField($this->order['telephone']));
 
-
 		$this->logger->debug(" CSBTSTATE - Provincia de la direcci&oacute;n de facturaci&oacute;n");
-		$payDataOperacion ['CSBTSTATE'] =  $this->order['payment_zone_cs_code'];
+		$stateCode = $this->getField(empty($this->order['shipping_zone_cs_code'])?$this->order['payment_zone_cs_code']:$this->order['shipping_zone_cs_code']);
+
+		if (empty($stateCode)) {
+			$stateCode = $this->getField(empty($this->order['shipping_zone_code'])?$this->order['payment_zone_code']:$this->order['shipping_zone_code']);
+		}
+
+		$payDataOperacion ['CSBTSTATE'] = (!empty($stateCode)) ? $stateCode[0] : 'C';
+	
 
 		$this->logger->debug(" CSBTSTREET1 - Domicilio de facturaci&oacute;n (calle y nro)");
 		$payDataOperacion ['CSBTSTREET1'] = $this->getField($this->order['payment_address_1']);

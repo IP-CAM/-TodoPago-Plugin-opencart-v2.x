@@ -11,33 +11,43 @@ class ControllerPaymentTodopago extends Controller {
     public function __construct($registry){
         parent::__construct($registry);
         $this->logger = loggerFactory::createLogger();
+        // cargo urls del json segun sea la version
+        $data = file_get_contents(DIR_APPLICATION . "../system/config/todopago_routes.json");
+        $tp_routes = json_decode($data, true);
+        $arr_version = explode('.', VERSION);
+        $oc_version = $arr_version[0]. '.' . $arr_version[1];
+        $this->tp_routes = $tp_routes[$oc_version];
     }
 
     public function index() {
         $data["ambiente"]= $this->get_mode();
-        $data["url_second_step"]= $this->config->get('config_url')."index.php?route=payment/todopago/second_step_todopago";
+        $data["url_second_step"]= $this->config->get('config_url')."index.php?route=".$this->tp_routes['payment-module']."/second_step_todopago";
         $data["formulario"] = $this->config->get('todopago_formulario');
         $this->load->language('payment/todopago');
-        $this->load->model('todopago/transaccion');
-        $this->load->model('payment/todopago');
+        $this->load->model($this->tp_routes['model'].'/transaccion');
+        $this->load->model($this->tp_routes['payment-module']);
 
         $this->load->model('checkout/order');
         $this->logger->debug("session_data: ".json_encode($this->session->data));
         $order_info = $this->model_checkout_order->getOrder($this->session->data['order_id']);
         $this->logger->debug("order_info: ".json_encode($order_info));
 
-
         if ($order_info) {
             $data['order_id'] = $order_info['order_id'];
+            $data['completeName'] = $order_info['payment_firstname'].' '.$order_info['payment_lastname'];
+            $data['mail'] = $order_info['email'];
 
-            $this->model_payment_todopago->editPaymentMethodOrder($data['order_id']);
+        $this->model_payment_todopago->editPaymentMethodOrder($data['order_id']);
         if($data["formulario"]!="hibrid"){
-            if (file_exists(DIR_TEMPLATE.$this->config->get('config_template').'/template/payment/todopago.tpl')){
-                $this->template = $this->config->get('config_template') . '/template/payment/todopago.tpl';
+            if(VERSION < '2.2.0.0'){
+                if (file_exists(DIR_TEMPLATE.$this->config->get('config_template').'/template/payment/todopago.tpl')){
+                    $this->template = $this->config->get('config_template') . '/template/payment/todopago.tpl';
+                } else {
+                    $this->template = 'default/template/payment/todopago.tpl';
+                }
             } else {
-                $this->template = 'default/template/payment/todopago.tpl';
+                $this->template = $this->tp_routes['payment'].'/todopago.tpl';
             }
-        
             //$this->load->view('payment/pp_express_confirm', $data)
         }else{
            
@@ -48,12 +58,12 @@ class ControllerPaymentTodopago extends Controller {
                 $this->template = 'default/template/payment/todopago_form.tpl';
             }
          } else {
-             $this->template = 'payment/todopago_form.tpl';
+             $this->template = $this->tp_routes['payment'].'/todopago_form.tpl';
          }
           
         }
 
-            $data['action'] = $this->config->get('config_url')."index.php?route=payment/todopago/first_step_todopago";
+            $data['action'] = $this->config->get('config_url')."index.php?route=".$this->tp_routes['payment-module']."/first_step_todopago";
             return $this->load->view($this->template, $data);
         }
     }
@@ -79,7 +89,7 @@ class ControllerPaymentTodopago extends Controller {
             }catch (Exception $e){
                 $this->logger->error("Ha surgido un error en el fist step", $e);
                 $this->model_checkout_order->addOrderHistory($this->order_id, $this->config->get('todopago_order_status_id_rech'), "TODO PAGO (Exception): ".$e);
-                $this->response->redirect($this->config->get('config_url')."index.php?route=payment/todopago/url_error&Order=".$this->order_id);
+                $this->response->redirect($this->config->get('config_url')."index.php?route=".$this->tp_routes['payment-module']."/url_error&Order=".$this->order_id);
 
             }
         }
@@ -92,7 +102,7 @@ class ControllerPaymentTodopago extends Controller {
     private function prepareOrder(){
         $this->setLoggerForPayment($this->order_id);
 
-        $this->load->model('todopago/transaccion');
+        $this->load->model($this->tp_routes['model'].'/transaccion');
 
         $this->model_todopago_transaccion->createRegister($this->order_id);
 
@@ -105,7 +115,7 @@ class ControllerPaymentTodopago extends Controller {
             $this->load->model('account/customer');
             $customer = $this->model_account_customer->getCustomer($this->order['customer_id']);
 
-            $this->load->model('payment/todopago');
+            $this->load->model($this->tp_routes['payment-module']);
             $this->model_payment_todopago->setLogger($this->logger);
 
             $controlFraude = ControlFraudeFactory::getControlfraudeExtractor($this->config->get('todopago_segmentodelcomercio'), $this->order, $customer, $this->model_payment_todopago, $this->logger);
@@ -145,14 +155,14 @@ class ControllerPaymentTodopago extends Controller {
                     $query = $this->model_todopago_transaccion->recordFirstStep($this->order_id, $paramsSAR, $rta_first_step);
                     $this->logger->debug('query recordFirstStep(): '.$query);
                     $this->model_checkout_order->addOrderHistory($this->order_id, $this->config->get('todopago_order_status_id_rech'), "TODO PAGO: ".$rta_first_step['StatusMessage']);
-                    $this->response->redirect($this->config->get('config_url')."index.php?route=payment/todopago/url_error&Order=".$this->order_id);
+                    $this->response->redirect($this->config->get('config_url')."index.php?route=".$this->tp_routes['payment-module']."/url_error&Order=".$this->order_id);
                 }
     }
 
     public function second_step_todopago(){
         $this->order_id = $_GET['Order'];
         $answer = $_GET['Answer'];
-        $this->load->model('todopago/transaccion');
+        $this->load->model($this->tp_routes['model'].'/transaccion');
         $this->setLoggerForPayment();
 
         if($this->model_todopago_transaccion->getStep($this->order_id) == $this->model_todopago_transaccion->getSecondStep()){
@@ -179,7 +189,7 @@ class ControllerPaymentTodopago extends Controller {
             catch(Exception $e){
                 $this->model_checkout_order->addOrderHistory($this->order_id, $this->config->get('todopago_order_status_id_rech'), "TODO PAGO (Exception): ".$e);
                 $this->logger->error("Error en el Second Step", $e);
-                $this->response->redirect($this->config->get('config_url')."index.php?route=payment/todopago/url_error&Order=".$this->order_id);
+                $this->response->redirect($this->config->get('config_url')."index.php?route=".$this->tp_routes['payment-module']."/url_error&Order=".$this->order_id);
 
             }
         }
@@ -210,7 +220,8 @@ class ControllerPaymentTodopago extends Controller {
             else{
                 $this->logger->warn('fail: '.$rta_second_step['StatusCode']);
                 $this->model_checkout_order->addOrderHistory($this->order_id, $this->config->get('todopago_order_status_id_rech'), "TODO PAGO: ".$rta_second_step['StatusMessage']);
-                $this->response->redirect($this->config->get('config_url')."index.php?route=payment/todopago/url_error&Order=".$this->order_id);
+                $this->response->redirect($this->config->get('config_url')."index.php?route=".$this->tp_routes['payment-module']
+."/url_error&Order=".$this->order_id);
             }
     }
     
@@ -251,8 +262,8 @@ class ControllerPaymentTodopago extends Controller {
     }
 
     private function getOptionsSARComercio(){
-        $paydata_comercial ['URL_OK'] =  $this->config->get('config_url')."index.php?route=payment/todopago/second_step_todopago&Order=".$this->order_id;
-        $paydata_comercial ['URL_ERROR'] = $this->config->get('config_url').'index.php?route=payment/todopago/second_step_todopago&Order='.$this->order_id;
+        $paydata_comercial ['URL_OK'] =  $this->config->get('config_url')."index.php?route=".$this->tp_routes['payment-module']."/second_step_todopago&Order=".$this->order_id;
+        $paydata_comercial ['URL_ERROR'] = $this->config->get('config_url').'index.php?route='.$this->tp_routes['payment-module'].'/second_step_todopago&Order='.$this->order_id;
         $paydata_comercial['Merchant'] = $this->get_id_site();
         $paydata_comercial['Security'] = $this->get_security_code();
         $paydata_comercial['EncodingMethod'] = 'XML';

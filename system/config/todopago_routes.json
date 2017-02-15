@@ -1,0 +1,38 @@
+{
+	"2.0" :{
+				"extension-list":"extension/payment",
+				"payment-module":"payment/todopago",
+				"template":"todopago",
+				"payment":"payment",
+				"extension":"",
+				"payment-extension":"payment/todopago",
+				"model":"todopago"
+			},
+	"2.1" :{
+				"extension-list":"extension/payment",
+				"payment-module":"payment/todopago",
+				"template":"todopago",
+				"payment":"payment",
+				"extension":"",
+				"payment-extension":"payment/todopago",
+				"model":"todopago"
+			},
+	"2.2" :{
+				"extension-list":"extension/payment",
+				"payment-module":"payment/todopago",
+				"template":"todopago",
+				"payment":"payment",
+				"extension":"",
+				"payment-extension":"payment/todopago",
+				"model":"todopago"
+			},
+	"2.3" :{
+				"extension-list":"extension/extension",
+				"payment-module" : "payment/todopago",
+				"template":"todopago",
+				"payment":"../payment",
+				"extension":"",
+				"payment-extension":"extension/payment/todopago",
+				"model":"todopago"
+			}
+}

@@ -1,5 +1,5 @@
-<?php echo $header; ?>
-<?php echo $column_left; ?>
+<?php if(empty($extension)){ echo $header; }?>
+<?php if(empty($extension)){ echo $column_left; }?>
 <div id="content">
   <div class="page-header">
     <div class="container-fluid">
@@ -34,9 +34,9 @@
 
 	return (event.keyCode != 116) && (event.keyCode == 154);
 	}
-	history.pushState(null, null, 'index.php?route=payment/todopago/confirmInstallation&token=8cddbffc58936e11a463b38a37cd8cf0');
+	history.pushState(null, null, 'index.php?route=<?php echo $extension; ?>payment/todopago/confirmInstallation&token=8cddbffc58936e11a463b38a37cd8cf0');
     window.addEventListener('popstate', function(event) {
-    history.pushState(null, null, 'index.php?route=payment/todopago/confirmInstallation&token=8cddbffc58936e11a463b38a37cd8cf0');
+    history.pushState(null, null, 'index.php?route=<?php echo $extension; ?>payment/todopago/confirmInstallation&token=8cddbffc58936e11a463b38a37cd8cf0');
     });
     var clickpermitido = false;
     $('#continueButton').bind('click', function (e){
@@ -55,4 +55,4 @@
         return "<?php echo $back_button_message; ?>";
     });
 //--></script>
-<?php echo $footer; ?>
+<?php if(empty($extension)){ echo $footer; }?>

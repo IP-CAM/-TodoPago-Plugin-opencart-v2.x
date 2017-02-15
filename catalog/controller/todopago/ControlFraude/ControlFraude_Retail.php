@@ -26,7 +26,13 @@ class ControlFraude_Retail extends ControlFraude{
         $payDataOperacion ['CSSTPOSTALCODE'] = $this->getField(empty($this->order['shipping_postcode'])?$this->order['payment_postcode']:$this->order['shipping_postcode']);
 
         $this->logger->debug("CSSTSTATE Provincia de envacute;o");
-        $payDataOperacion ['CSSTSTATE'] = $this->getField(empty($this->order['shipping_zone_cs_code'])?$this->order['payment_zone_cs_code']:$this->order['shipping_zone_cs_code']);
+        $stateCode = $this->getField(empty($this->order['shipping_zone_cs_code'])?$this->order['payment_zone_cs_code']:$this->order['shipping_zone_cs_code']);
+
+        if (empty($stateCode)) {
+            $stateCode = $this->getField(empty($this->order['shipping_zone_code'])?$this->order['payment_zone_code']:$this->order['shipping_zone_code']);
+        }
+
+        $payDataOperacion ['CSSTSTATE'] = (!empty($stateCode)) ? $stateCode[0] : 'C';
 
         $this->logger->debug("CSSTSTREET1 Domicilio de env&iacute;o");
         $payDataOperacion ['CSSTSTREET1'] = $this->getField(empty($this->order['shipping_address_1'])?$this->order['payment_address_1']:$this->order['shipping_address_1']);

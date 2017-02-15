@@ -25,8 +25,9 @@ Por requerimientos del medio de pago el plugin configurará l código postal com
 ## Instalación
 1. Descomprimir el archivo opencart-plugin-master.zip. 
 2.	Copiar carpeta 'catalog' y 'admin' al root de opencart con los mismos nombres.
-3.	Luego ir a 'extensions->payments' y ir a la opción Todo Pago e instalar.
-
+3. Verificar que al menos el usuario administrador tenga los permisos de acceso y modificación de <strong>payment/todopago</strong>.
+![imagen de configuracion](https://raw.githubusercontent.com/TodoPago/imagenes/master/opencart20/opencart2_usergroup.PNG)
+4.	Luego ir a 'extensions->payments' e ir a la opción Todo Pago e instalar.
 ![imagen de configuracion](https://raw.githubusercontent.com/TodoPago/imagenes/master/README.img/opencart2_configuracion.PNG)
 
 Observaci&oacute;n:
@@ -56,20 +57,24 @@ Descomentar: <em>extension=php_soap.dll</em> del php.ini, ya que para la conexi�
 ####Configuración plug in
 Para llegar al menu de configuración ir a: <em>System->Configuration</em> y seleccionar Paymenth Method en el menú izquierdo.
 Una vez instalado el plug in, ir a 'extensions->payments' y ir a la opción Todo Pago, hacer click en el lápiz, para comenzar a configurar.
-La configuracion del Plug in esta dividido en 5 solapas (GENERAL, AMBIENTE TEST, AMBIENTE PRODUCCION, ESTADO DEL PEDIDO) y una solapa adiccional (Status de la Operación) que se utiliza para ver el estado de la orden (transacción) de manera on line.
+La configuración del Plug in esta dividido en 5 solapas (GENERAL, AMBIENTE TEST, AMBIENTE PRODUCCIÓN, ESTADO DEL PEDIDO) y una solapa adiccional (Status de la Operación) que se utiliza para ver el estado de la orden (transacción) de manera on line.
 ![imagen de solapas de configuracion](https://raw.githubusercontent.com/TodoPago/imagenes/master/README.img/opencart2_conf_solapas.PNG)
 
 [Formulario Hibrido](#formHibrido).
 <a name="formHibrido"></a>
 ####Formulario Híbrido
-En la versión 1.7 del Plugin se incluyen dos tipos de formularios de pago, redirección y Formulario Híbrido (embebido en el e commerce). Para utilizar este último se debe seleccionar Híbrido en la configuración geneeral delPlugin. 
+En la versión 1.7 del Plugin se incluyen dos tipos de formularios de pago, redirección y Formulario Híbrido (embebido en el e commerce). Para utilizar este último se debe seleccionar Híbrido en la configuración general del Plugin. 
 ![imagen de solapas de configuracion](https://raw.githubusercontent.com/TodoPago/imagenes/master/opencart20/Selección_015.png)
+El formulario seleccionado se mostrara en la etapa final del proceso de pago "Confirmar pago".
+![imagen de solapas de configuracion](https://raw.githubusercontent.com/TodoPago/imagenes/master/opencart20/FormularioHibrido.PNG)
+Existen dos formas de pago, ingresando los datos de una tarjeta o utilizando la billetera de Todopago. Al ir a "Pagar con Billetera" desplegara una ventana que permitira ingresar a billetera y realizar el pago.
+![imagen de solapas de configuracion](https://raw.githubusercontent.com/TodoPago/imagenes/master/opencart20/BilleteraHibrido.PNG)
 
 [Obtener datos de configuracion](#getcredentials).
 <a name="getcredentials"></a>
-####Obtener datos de configuracion
-En el popup loguearse con el mail y password de Todopago. Los datos se cargaran automaticamente en los campos Authorization HTTP y Id Site Todo Pago code en el ambiente correspondiente (Desarrollo o produccion ) y solo hay que hacer click en el boton guardar datos y listo.
-![imagen de solapas de configuracion](https://raw.githubusercontent.com/TodoPago/imagenes/master/opencart15/Selecci%C3%B3n_016.png)
+####Obtener datos de configuración
+En el popup loguearse con el mail y password de Todopago. Los datos se cargaran automaticamente en los campos Authorization HTTP y Id Site Todo Pago code en el ambiente correspondiente (Desarrollo o producción) y solo hay que hacer click en el botón guardar datos y listo.
+![imagen de solapas de configuracion](https://raw.githubusercontent.com/TodoPago/imagenes/master/opencart20/Selección_016.png)
 
 
 <sub><em>Menú principal</em></sub>
