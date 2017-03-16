@@ -47,7 +47,7 @@ curl_close ($ch);
 		<tbody>
 
 			<tr>
-				<td>
+				<td width="50%">
 					<div>
 						<select id="formaDePagoCbx" class="form-control"></select>	
 					</div>
@@ -68,6 +68,20 @@ curl_close ($ch);
 				</td>
 			</tr>
 
+			<!-- Para los casos en el que el comercio opera con PEI -->
+			<tr>
+				<td colspan="2">
+					<div>
+						<input id="peiCbx" />
+						<label id="labelPeiCheckboxId"></label>
+					</div>
+					<div>
+						<input id="peiTokenTxt" class="left form-control text-box single-line" />
+						<label id="labelPeiTokenTextId"></label>
+					</div><br/>
+				</td>
+			</tr>
+
 			<tr>
 				<td>
 					<div>
@@ -84,12 +98,11 @@ curl_close ($ch);
 
 			<tr>
 				<td colspan="2">
-					<input id="mesTxt" >
-				/
-					<input id="anioTxt" >
+					<input id="mesTxt" />
+					/
+					<input id="anioTxt" />
 				</td>
 			</tr>
-
 
 			<tr>
 				<td colspan="2">
@@ -113,7 +126,7 @@ curl_close ($ch);
 			<tr>
 				<td colspan="2">
 					<div >
-						<input id="emailTxt" class="left form-control" /><br/>
+						<input id="emailTxt" class="left form-control" />
 					</div>
 				</td>
 			</tr>

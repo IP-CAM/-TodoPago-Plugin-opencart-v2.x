@@ -101,9 +101,12 @@ public function install(){
                 case "1.7.0":
                     $this->logger->debug("Upgrade to v1.8.0");
                 case "1.8.0":
-          $this->logger->debug("Upgrade to v1.8.1");
+                    $this->logger->debug("Upgrade to v1.8.1");
                 case "1.8.1":
-                    
+                    $this->logger->debug("Upgrade to v1.9.0");
+                case "1.9.0":
+                    $this->logger->debug("Upgrade to v1.10.0");
+                case "1.10.0":
                    $this->logger->info("Plugin instalado/upgradeado");
                 }
     }
@@ -138,7 +141,6 @@ public function install(){
                     catch (Exception $e){
                         $errorMessage = 'Fallo deconocido, se pedirá reintentar';
                         $this->logger->fatal($errorMessage, $e);
-                        break;
                     }
                 }
             }
