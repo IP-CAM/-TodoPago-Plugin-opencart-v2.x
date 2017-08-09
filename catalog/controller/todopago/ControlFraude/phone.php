@@ -18,6 +18,8 @@ class phone{
     }
 
     public static function clean($number, $logger=null){
+	if(empty($number)) return null;
+
         $return = "";
         if($logger != null){
             $logger->debug("numero cliente: ".$number);

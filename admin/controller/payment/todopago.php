@@ -202,6 +202,24 @@ public function install(){
         $this->response->redirect($this->url->link($this->tp_routes['extension-list'], 'token=' . $this->session->data['token'], 'SSL'));
     }
 
+    protected function validate() {
+        $timeout_form = '';
+        $res = true;
+
+        if (isset($this->request->post['todopago_timeout_form_enabled'])){
+            if (isset($this->request->post['todopago_timeout_form'])){
+                $timeout_form = $this->request->post['todopago_timeout_form'];
+            } else {
+                $timeout_form = $this->config->get('todopago_timeout_form');
+            }
+
+            if($timeout_form < 60*5*1000 || $timeout_form > 6*60*60*1000) {
+                $res = false;
+            }
+        }
+
+        return $res;
+    }
 
     public function index() {
         $this->language->load('payment/todopago');
@@ -213,7 +231,7 @@ public function install(){
         $this->load->model($this->tp_routes['payment-module']);
         $this->load->model('todopago/transaccion_admin');
 
-    if (($this->request->server['REQUEST_METHOD'] == 'POST')) { //Si Viene con datos via post viene con datos del menú de configuracion.
+    if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validate() ) { //Si Viene con datos via post viene con datos del menú de configuracion.
       $this->model_setting_setting->editSetting('todopago', $this->request->post);
             if ($this->request->post['upgrade'] == '1'){ //Si necesita upgradear llamamos al _install()
                $this->response->redirect($this->url->link($this->tp_routes['payment-module'] .'/_install', 'action='.self::UPGRADE.'&token=' . $this->session->data['token'] .'&pluginVersion='.$this->model_payment_todopago->getVersion(), 'SSL'));
@@ -222,6 +240,10 @@ public function install(){
                 $this->session->data['success'] = "Guardado.";
             }
             $this->response->redirect($this->url->link($this->tp_routes['extension-list'], 'token=' . $this->session->data['token'], 'SSL'));
+        } else {
+            if ($this->request->server['REQUEST_METHOD'] == 'POST') {
+                $this->session->data['error'] = "Error en el rango del campo timeout";
+            }
         }
 
         $data['heading_title'] = "Todo Pago";
@@ -289,10 +311,8 @@ public function install(){
         
         //error
         if (isset($this->session->data['error'])) { //It must work...
-          $data['error'] = $this->session->data['error'];
+          $data['error']['error_warning'] = $this->session->data['error'];
           unset($this->session->data['error']);
-      } else {
-          $data['error'] = '';
       }
 
         //datos para el tag general
@@ -336,6 +356,24 @@ public function install(){
           $data['todopago_maxinstallments'] = $this->request->post['todopago_maxinstallments'];
       } else {
           $data['todopago_maxinstallments'] = $this->config->get('todopago_maxinstallments');
+      }
+
+      if (isset($this->request->post['todopago_timeout_form_enabled'])){
+          $data['todopago_timeout_form_enabled'] = 1;
+      } else {
+          $data['todopago_timeout_form_enabled'] = $this->config->get('todopago_timeout_form_enabled');
+      }
+
+      if (isset($this->request->post['todopago_timeout_form'])){
+          $data['todopago_timeout_form'] = $this->request->post['todopago_timeout_form'];
+      } else {
+          $data['todopago_timeout_form'] = $this->config->get('todopago_timeout_form');
+      }
+
+      if (isset($this->request->post['todopago_cart'])){
+          $data['todopago_cart'] = $this->request->post['todopago_cart'];
+      } else {
+          $data['todopago_cart'] = $this->config->get('todopago_cart');
       }
 
     //datos para tags ambiente test
@@ -453,15 +491,15 @@ public function devolver(){
             
             if(empty($monto)) {
                 $this->logger->info("Pedido de devolución total pesos de la orden $order_id");
-                $this->logger->debug(json_encode($options));
+                $this->logger->info(json_encode($options));
                 $resp = $connector->voidRequest($options);
-                $this->logger->debug(json_encode($resp));
+                $this->logger->info(json_encode($resp));
             } else {
                 $this->logger->info("Pedido de devolución por $monto pesos de la orden $order_id");
                 $options["AMOUNT"] = $monto;
-                $this->logger->debug(json_encode($options));
+                $this->logger->info(json_encode($options));
                 $resp = $connector->returnRequest($options);
-                $this->logger->debug(json_encode($resp));
+                $this->logger->info(json_encode($resp));
             }
 
             if($resp["StatusCode"]=="2011"){
@@ -498,8 +536,8 @@ public function devolver(){
 public function get_status()
 {
     $order_id = $_GET['order_id'];
-    $this->load->model($this->tp_routes['template'].'/transaccion_admin');
-    $transaction = $this->model_todopago_transaccion_admin;
+    $this->load->model($this->tp_routes['model'].'/transaccion');
+    $transaction = $this->model_todopago_transaccion;
     $this->logger->debug('todopago -  step: '.$transaction->getStep($order_id));
        // if($transaction->getStep($order_id) == $transaction->getTransactionFinished()){
     $authorizationHTTP = $this->get_authorizationHTTP();
@@ -527,9 +565,9 @@ public function get_status()
             if (isset($status['Operations']) && is_array($status['Operations']) ) {
                 foreach ($status['Operations'] as $key => $value) {
                     if (is_array($value) && $key == $auxColection) {
-                        $rta .= "$key: \n";
+                        $rta .= "$key: <br/>";
                         foreach ($auxArray[$aux] as $key2 => $value2) {
-                            $rta .= $aux." \n";
+                            $rta .= $aux." <br/>";
                             if (is_array($value2)) {
                                 foreach ($value2 as $key3 => $value3) {
                                     if (is_array($value3)) {
@@ -538,14 +576,14 @@ public function get_status()
                                             $complete_value = preg_replace_callback('/\\\\u(\w{4})/', function ($matches) {
                                                 return html_entity_decode('&#x' . $matches[1] . ';', ENT_COMPAT, 'UTF-8');
                                             }, $complete_value);
-                                            $rta .= "   - $key4: $complete_value \n";
+                                            $rta .= "   - $key4: $complete_value <br/>";
                                         }
                                     } else {
                                         $complete_value = json_encode($value3);
                                         $complete_value = preg_replace_callback('/\\\\u(\w{4})/', function ($matches) {
                                             return html_entity_decode('&#x' . $matches[1] . ';', ENT_COMPAT, 'UTF-8');
                                         }, $complete_value);
-                                        $rta .= "   - $key3: $complete_value \n"; 
+                                        $rta .= "   - $key3: $complete_value <br/>"; 
                                     }
                                 }
                             } else {
@@ -553,18 +591,18 @@ public function get_status()
                                 $complete_value = preg_replace_callback('/\\\\u(\w{4})/', function ($matches) {
                                     return html_entity_decode('&#x' . $matches[1] . ';', ENT_COMPAT, 'UTF-8');
                                 }, $complete_value);
-                                $rta .= "   - $key2: $complete_value \n";
+                                $rta .= "   - $key2: $complete_value <br/>";
                             }
                         }
                     } else {
                         if (is_array($value)) {
-                            $rta .= "$key: \n";
+                            $rta .= "$key: <br/>";
                         } else {
                             $complete_value = json_encode($value);
                             $complete_value = preg_replace_callback('/\\\\u(\w{4})/', function ($matches) {
                                 return html_entity_decode('&#x' . $matches[1] . ';', ENT_COMPAT, 'UTF-8');
                             }, $complete_value);
-                            $rta .= "$key: $complete_value \n";
+                            $rta .= "$key: $complete_value <br/>";
                         }
                     }
                 }

@@ -29,7 +29,7 @@
 	"2.3" :{
 				"extension-list":"extension/extension",
 				"payment-module" : "payment/todopago",
-				"template":"todopago",
+				"template":"../todopago",
 				"payment":"../payment",
 				"extension":"",
 				"payment-extension":"extension/payment/todopago",

@@ -32,6 +32,12 @@ $server_output = curl_exec ($ch);
 $rta_server = json_decode($server_output);
 
 curl_close ($ch);
+
+if ($rta_server->StatusCode != -1) {
+?>
+	<script>window.location.href = "<?php echo $rta_server->URL_ErrorPageHybrid; ?>"</script>
+<?php
+}
 ?>
 
 <div id="formualrio_hibrido" class="table-responsive" hidden>
@@ -200,7 +206,12 @@ curl_close ($ch);
 		function billeteraPaymentResponse(response) {
 			console.log("My wallet callback");
 			console.log(response.ResultCode + " : " + response.ResultMessage);
-            window.location.href = "<?php echo $url_second_step.'&Order='.$order_id.'&Answer=' ?>"+response.AuthorizationKey;
+            
+            if (response.AuthorizationKey) {
+				window.location.href = "<?php echo $url_second_step.'&Order='.$order_id.'&Answer=' ?>"+response.AuthorizationKey;
+			} else {
+				window.location.href = "<?php echo $url_second_step.'&Order='.$order_id.'&ResultMessage=' ?>"+response.ResultMessage;
+			}
 		}
 
 		function customPaymentErrorResponse(response) {
@@ -208,7 +219,11 @@ curl_close ($ch);
 			console.log(response.ResultCode + " : " + response.ResultMessage);
 			console.log(response);
 			
-			window.location.href = "<?php echo $url_second_step.'&Order='.$order_id.'&Answer=' ?>"+response.AuthorizationKey;
+			if (response.AuthorizationKey) {
+				window.location.href = "<?php echo $url_second_step.'&Order='.$order_id.'&Answer=' ?>"+response.AuthorizationKey;
+			} else {
+				window.location.href = "<?php echo $url_second_step.'&Order='.$order_id.'&ResultMessage=' ?>"+response.ResultMessage;
+			}
 		}
 		function initLoading() {
 			console.log('Cargando');

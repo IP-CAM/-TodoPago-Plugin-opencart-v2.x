@@ -20,7 +20,7 @@ Todo Pago - módulo SDK-PHP para conexión con gateway de pago
     + [Devolucion parcial](#devolucionparcial)
     + [Formulario hibrido](#formhidrido)
     + [Obtener Credenciales](#credenciales)
-    + [Máximo de cuotas a mostrar en formulario](#maxcuotas)
+    + [Limites de cuotas a mostrar en formulario](#minmaxcuotas)
  + [Diagrama de secuencia](#secuencia)
  + [Tablas de referencia](#tablareferencia)		
  + [Tabla de errores](#codigoerrores)
@@ -124,7 +124,7 @@ array (size=2)
 En este caso hay que llamar a **getAuthorizeAnswer()**, enviando como parámetro un array como se describe a continuación.		
 ```php		
 $optionsQuery = array (		
-		'Security'   => '1234567890ABCDEF1234567890ABCDEF', // Token de seguridad, provisto por TODO PAGO. MANDATORIO.		
+		'Security'   => '1234567890ABCDEF1234567890ABCDEF', // Token de seguridad, provisto por TODO PAGO. MANDATORIO
 		'Merchant'   => '12345678',		
 		'RequestKey' => '0123-1234-2345-3456-4567-5678-6789',		
 		'AnswerKey'  => '1111-2222-3333-4444-5555-6666-7777' // *Importante		
@@ -154,7 +154,9 @@ array(
           'PAYMENTMETHODNAME'      => 'VISA',		
           'TICKETNUMBER'           => '12',		
           'CARDNUMBERVISIBLE'      => '450799******4905',		
-          'AUTHORIZATIONCODE'      => 'TEST38'), 		
+          'AUTHORIZATIONCODE'      => 'TEST38',
+          'INSTALLMENTPAYMENTS'    => '5'
+        ), 		
       'Request' => 		
         array (		
           'MERCHANT'               => '12345678',		
@@ -467,6 +469,16 @@ El endpoint depende del entorno:
 + Desarrollo: https://developers.todopago.com.ar/resources/TPHybridForm-v0.1.js
 + Produccion: https://forms.todopago.com.ar/resources/TPHybridForm-v0.1.js
 
+También se provee un método en la SDK para obtener el endpoint de la libreria Javascript:
+
+```php
+
+$sdk = new \TodoPago\Sdk($http_header, $mode);
+
+$js = $sdk->getEndpointForm();
+
+```
+
 **Restricciones y libertades en la implementación**
 
 + Ninguno de los campos del formulario podrá contar con el atributo name.
@@ -498,6 +510,7 @@ El formulario implementado debe contar al menos con los siguientes campos.
 	<select id="tipoDocCbx"></select>
 	<input id="nroDocTxt"/>
 	<input id="emailTxt"/><br/>
+	<button id="MY_btnPagarConBilletera"/>
 	<button id="MY_btnConfirmarPago"/>
 </body>
 ```
@@ -514,7 +527,9 @@ window.TPFORMAPI.hybridForm.initForm({
     callbackValidationErrorFunction: 'validationCollector',
 	callbackCustomSuccessFunction: 'customPaymentSuccessResponse',
 	callbackCustomErrorFunction: 'customPaymentErrorResponse',
+        callbackBilleteraFunction: 'billeteraPaymentResponse',
 	botonPagarId: 'MY_btnConfirmarPago',
+	botonPagarConBilleteraId: 'MY_btnPagarConBilletera',
 	modalCssClass: 'modal-class',
 	modalContentCssClass: 'modal-content',
 	beforeRequest: 'initLoading',
@@ -532,6 +547,8 @@ window.TPFORMAPI.hybridForm.setItem({
 //callbacks de respuesta del pago
 function validationCollector(parametros) {
 }
+function billeteraPaymentResponse(response) {
+}
 function customPaymentSuccessResponse(response) {
 }
 function customPaymentErrorResponse(response) {
@@ -544,7 +561,8 @@ function stopLoading() {
 
 **Callbacks**<br>
 El formulario define callbacks javascript, que son llamados según el estado y la informacion del pago realizado:
-+ customPaymentSuccessResponse: Devuelve response si el pago se realizo correctamente.
++ billeteraPaymentResponse: Devuelve response si el pago con billetera se realizó correctamente.
++ customPaymentSuccessResponse: Devuelve response si el pago se realizó correctamente.
 + customPaymentErrorResponse: Si hubo algun error durante el proceso de pago, este devuelve el response con el codigo y mensaje correspondiente.
 
 **Ejemplo de Implementación**:
@@ -596,18 +614,19 @@ $rta->getApikey();
 [<sub>Volver a inicio</sub>](#inicio)
 <br>
 
-<a name="maxcuotas"></a>
-####Máximo de cuotas a mostrar en formulario
-Mediante esta funcionalidad, se permite setear el número máximo de cuotas que se desplegará en el formulario de pago.
+<a name="minmaxcuotas"></a>
+####Límites de cuotas a mostrar en formulario
+Mediante esta funcionalidad, se permite setear el número mínimo y máximo de cuotas que se desplegará en el formulario de pago.
 
-Para hacer uso de esta funcionalidad debe agregarse en el parámetro **optionsSAR_operacion** del método **sendAuthorizeRequest** el campo **MAXINSTALLMENTS** con el valor máximo de cuotas a ofrecer (generalmente de 1 a 12)
+Para hacer uso de esta funcionalidad debe agregarse en el parámetro **optionsSAR_operacion** del método **sendAuthorizeRequest** el campo **MININSTALLMENTS** y **MAXINSTALLMENTS** con el valor mínimo y máximo de cuotas a ofrecer respectivamente. En caso que no se especifiquen estos valores se mostrarán cuotas de 1 a 12.
 
 #####Ejemplo
 
 ```php		
 $optionsSAR_operacion = array(		
-	...........................................................................		
-	'MAXINSTALLMENTS' => 6, //Nro maximo de cuotas a mostrar en el formulario, OPCIONAL.
+	...........................................................................	
+	'MININSTALLMENTS' => 3, 	
+	'MAXINSTALLMENTS' => 8, //Nro maximo de cuotas a mostrar en el formulario, OPCIONAL.
 	...........................................................	
 );
 ```
@@ -714,3 +733,4 @@ $optionsSAR_operacion = array(
 </table>
 
 [<sub>Volver a inicio</sub>](#inicio)
+
