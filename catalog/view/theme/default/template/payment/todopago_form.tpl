@@ -1,176 +1,199 @@
-<?php if ($ambiente == "test") { ?>
-	<script type="text/javascript" src="https://developers.todopago.com.ar/resources/TPHybridForm-v0.1.js"></script>
-<?php } else { ?>
-	<script type="text/javascript" src="https://forms.todopago.com.ar/resources/TPHybridForm-v0.1.js"></script>
-<?php } ?>
+<link href="catalog/view/theme/default/stylesheet/todopago_form.css" rel="stylesheet">
+
 <div  class="pull-right button">
-<input type="button" id="comenzar_pago_btn" onclick="init_my_form()" class="btn btn-primary" value="Comenzar Pago"></button>
+    <input type="button" id="comenzar_pago_btn" onclick="init_my_form()" class="btn btn-primary" value="Comenzar Pago"></button>
 </div>
+
 <script type="text/javascript">
-	function init_my_form(){
-		todopago_init_form();
-		todopago_hybrid_form();
-		$("#formualrio_hibrido").show();
-		$("#comenzar_pago_btn").hide();
-	}
-	
+    function init_my_form() {
+        $.post( "<?php echo $action; ?>", {order_id: <?php echo($order_id); ?> }).done(function(data) {
+            loadScript('<?php echo $script; ?>', function () {
+                if (data) {
+                    try {
+                        var response = JSON.parse(data);
+                        console.log(response);
+                        if (response.hasOwnProperty('PublicRequestKey'))
+                            loader(response.PublicRequestKey);
+                        else
+                            window.location.href = response.URL_ErrorPageHybrid;
+                    } catch(e) {
+                        console.log(e); // error in the above string (in this case, yes)!
+                        window.location.href = "<?php echo $url_fail_page; ?>"
+                    }
+                } else {
+                    window.location.href = "<?php echo $url_fail_page; ?>"
+                }
+            });
+        });
+
+        $("#loading-hibrid").css("width", "33%");
+        $("#formulario_hibrido").show();
+        $("#comenzar_pago_btn").hide();
+        $("#progress").show();
+    }
 </script>
 
-<?php
-$ch = curl_init();
-
-curl_setopt($ch, CURLOPT_URL,$action);
-curl_setopt($ch, CURLOPT_POST, 1);
-curl_setopt($ch, CURLOPT_POSTFIELDS,
-            "order_id=$order_id");
-
-
-// receive server response ...
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-
-$server_output = curl_exec ($ch);
-$rta_server = json_decode($server_output);
-
-curl_close ($ch);
-
-if ($rta_server->StatusCode != -1) {
-?>
-	<script>window.location.href = "<?php echo $rta_server->URL_ErrorPageHybrid; ?>"</script>
-<?php
-}
-?>
-
-<div id="formualrio_hibrido" class="table-responsive" hidden>
-	<table class="table table-bordered table-hover">
-		<thead>
-			<tr>
-				<td colspan="2">
-				<div id="tp-logo"></div>
-				<p class="tp-label">Elegí tu forma de pago </p></td>
-			</tr>
-		</thead>
-
-		<tbody>
-
-			<tr>
-				<td width="50%">
-					<div>
-						<select id="formaDePagoCbx" class="form-control"></select>	
-					</div>
-				</td>
-				<td>
-					<div>
-						<select id="bancoCbx" class="form-control"></select>
-					</div>
-				</td>
-			</tr>
-
-			<tr>
-				<td colspan="2">
-					<div>
-						<select id="promosCbx" class="form-control"></select>
-						<label id="labelPromotionTextId" class="left"></label>
-					</div>
-				</td>
-			</tr>
-
-			<!-- Para los casos en el que el comercio opera con PEI -->
-			<tr>
-				<td colspan="2">
-					<div>
-						<input id="peiCbx" />
-						<label id="labelPeiCheckboxId"></label>
-					</div>
-					<div>
-						<input id="peiTokenTxt" class="left form-control text-box single-line" />
-						<label id="labelPeiTokenTextId"></label>
-					</div><br/>
-				</td>
-			</tr>
-
-			<tr>
-				<td>
-					<div>
-						<input id="numeroTarjetaTxt"  class="form-control left" />
-					</div>
-				</td>
-				<td>
-					<div>
-						<input id="codigoSeguridadTxt" class="form-control left" />
-						<label id="labelCodSegTextId" ></label>
-					</div>
-				</td>
-			</tr>
-
-			<tr>
-				<td colspan="2">
-					<input id="mesTxt" />
-					/
-					<input id="anioTxt" />
-				</td>
-			</tr>
-
-			<tr>
-				<td colspan="2">
-					<div>
-						<input id="apynTxt" class="left form-control" />
-					</div>
-				</td>
-			</tr>
-				
-			<tr>
-				<td>
-					
-						<select id="tipoDocCbx" class="form-control" ></select>
-					
-				</td>
-				<td>
-						<input id="nroDocTxt" class="form-control" />					
-				</td>
-			</tr>
-
-			<tr>
-				<td colspan="2">
-					<div >
-						<input id="emailTxt" class="left form-control" />
-					</div>
-				</td>
-			</tr>
-
-		</tbody>
-		<tfoot>
-		
-		</tfoot>
-
-	</table>
-	
-		
-		<div  class="pull-right">
-				<input type="button" class="btn btn-primary" id="MY_btnConfirmarPago" class="button" value="Pagar"/>
-		</div>
-	
-		<div  class="pull-right">
-				<input type="button" class="btn btn-primary" id="MY_btnPagarConBilletera" class="button" value="Pagar con Billetera"/>
-		</div>
+<!-- inicio formulario -->
+<div id="progress" class="progress" hidden>
+    <div class="progress-bar progress-bar-striped active" id="loading-hibrid" role="progressbar" aria-valuemin="0"
+         aria-valuemax="100">
+    </div>
 </div>
 
-	<script>
-				
-		var orderid = '<?php echo $order_id; ?>';
+<div id="formulario_hibrido" hidden>
+    <div class="formuHibrido container-fluid" id="tpForm">
+        <img src="https://portal.todopago.com.ar/app/images/logo.png" alt="todopago" id="todopago_logo">
+        <!-- row  1 -->
+        <div class="row">
+            <div class="col-md-2">
+                <select id="formaPagoCbx" class="input form-control"></select>
+            </div>
+            <div class="loaded-form">
+                <div class="col-md-4">
+                    <input id="numeroTarjetaTxt" class="input form-control">
+                    <label id="numeroTarjetaLbl" for="numeroTarjetaTxt" class="warning"></label>
+                </div>
+                <div class="col-md-6 nombreTexto">
+                    <input id="nombreTxt" class="input form-control">
+                </div>
+            </div>
+        </div>
 
+        <div class="loaded-form">
+            <div class="row" id="row-pei">
+                <div class="col-md-6 col-md-offset-2">
+                    <div class="form-horizontal">
+                        <div class="checkbox">
+                            <input id="peiCbx" type="checkbox">
+                            <label id="peiLbl" for="peiCbx"></label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- row 2 -->
+            <div class="row">
+                <div class="col-md-2">
+                    <select id="medioPagoCbx" class="input form-control"></select>
+                </div>
+                <div class="col-md-4">
+                    <select id="bancoCbx" class="input form-control"></select>
+                </div>
+                <div class="col-md-2">
+                    <select id="tipoDocCbx" class="input form-control"></select>
+                </div>
+                <div class="col-md-4">
+                    <input id="nroDocTxt" class="input form-control">
+                </div>
+            </div>
+            <!-- row 3 -->
+            <div class="row">
 
-		//securityRequesKey, esta se obtiene de la respuesta del SAR
-		var security = "<?php echo $rta_server->PublicRequestKey; ?>";
-		var mail = "<?php echo $mail; ?>";
-		var completeName = "<?php echo $completeName; ?>";
-		var dni = '';
-		var defDniType = 'DNI'
-			
-		/************* CONFIGURACION DEL API ************************/
-		function todopago_init_form()
-			{window.TPFORMAPI.hybridForm.initForm({
-			callbackValidationErrorFunction: 'validationCollector',
-			callbackBilleteraFunction: 'billeteraPaymentResponse',
+                <div class="col-md-2">
+                    <select id="mesCbx" class="input form-control"></select>
+                </div>
+                <div class="col-md-2">
+                    <select id="anioCbx" class="input form-control"></select>
+                    <label id="fechaLbl" class="warning"></label>
+                </div>
+                <div class="col-md-2">
+                    <input id="codigoSeguridadTxt" class="input form-control">
+                    <label id="codigoSeguridadLbl" for="codigoSeguridadTxt" class="warning"></label>
+                </div>
+                <div class="col-md-6">
+                    <input id="emailTxt" class="input form-control">
+                </div>
+            </div>
+            <!-- row 4 -->
+            <div class="row">
+                <div class="col-md-6">
+                    <select id="promosCbx" class="input form-control"></select>
+                </div>
+                <div class="col-md-3">
+                    <input id="tokenPeiTxt" class="input form-control">
+                    <label id="tokenPeiLbl" for="tokenPeiTxt" class="warning"></label>
+                </div>
+            </div>
+            <!-- row 5 -->
+            <div class="row">
+                <div class="col-md-2">
+                    <label id="promosLbl" for="promosCbx"></label>
+                </div>
+            </div>
+        </div>
+        <!-- row 6 -->
+        <div class="row">
+            <button id="MY_btnPagarConBilletera" class="btn btn-primary pull-right"></button>
+            <button id="MY_btnConfirmarPago" class="btn btn-primary pull-right"></button>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    /************* CONFIGURACION DEL API *****************/
+
+    function loadScript(url, callback) {
+        var script = document.createElement("script");
+        script.type = "text/javascript";
+        if (script.readyState) {  //IE
+            script.onreadystatechange = function () {
+                if (script.readyState === "loaded" || script.readyState === "complete") {
+                    script.onreadystatechange = null;
+                    callback();
+                }
+            };
+        } else {  //et al.
+            script.onload = function () {
+                callback();
+            };
+            script.onerror = function () {
+                window.location.href = "<?php echo $url_second_step.'&Order='.$order_id.'&ResultMessage=' ?>" + "Falló la carga del formulario.";
+            }
+        }
+        script.src = url;
+        document.getElementsByTagName("head")[0].appendChild(script);
+    }
+
+    var formaDePago = document.getElementById("formaPagoCbx");
+    formaDePago.addEventListener("click", function () {
+        if (formaDePago.value === "1") {
+            $(".loaded-form").show('fast');
+        } else {
+            $(".loaded-form").hide('fast');
+        }
+    });
+
+    formaDePago.addEventListener('blur', function () {
+        setTimeout(function () {
+            peiLabelLoader();
+        }, 200);
+    });
+
+    function peiLabelLoader() {
+        console.log($("#peiCbx").css('display'));
+
+    }
+    
+    function loader(publicRequestKey) {
+        $("#loading-hibrid").css("width", "66%");
+        setTimeout(function () {
+            ignite(publicRequestKey);
+        }, 100);
+        setTimeout(function () {
+            $("#loading-hibrid").css("width", "100%");
+        }, 1000);
+        setTimeout(function () {
+            $(".progress").hide('fast');
+        }, 1500);
+        setTimeout(function () {
+            $("#tpForm").fadeTo('fast', 1);
+        }, 1700);
+    }
+
+    function ignite(publicRequestKey) {
+        //  window.TPFORMAPI.hybridForm.constructDefaultForm("formContainer");
+        window.TPFORMAPI.hybridForm.initForm({
+            callbackValidationErrorFunction: 'validationCollector',
+            callbackBilleteraFunction: 'billeteraPaymentResponse',
             callbackCustomSuccessFunction: 'customPaymentSuccessResponse',
             callbackCustomErrorFunction: 'customPaymentErrorResponse',
             botonPagarId: 'MY_btnConfirmarPago',
@@ -179,68 +202,69 @@ if ($rta_server->StatusCode != -1) {
             modalContentCssClass: 'modal-content',
             beforeRequest: 'initLoading',
             afterRequest: 'stopLoading'
-		});}
-		/************* SETEO UN ITEM PARA COMPRAR ************************/
-        function todopago_hybrid_form(){
-        window.TPFORMAPI.hybridForm.setItem({
-            publicKey: security,
-            defaultNombreApellido: completeName,
-            defaultNumeroDoc: dni,
-            defaultMail: mail,
-            defaultTipoDoc: defDniType
         });
-		}
-		//callbacks de respuesta del pago
-		function validationCollector(parametros) {
-			console.log("My validator collector");
-			console.log(parametros.field + " ==> " + parametros.error);
-			console.log(parametros);
-		}
-		function customPaymentSuccessResponse(response) {
-			console.log("My custom payment success callback");
-			console.log(response.ResultCode + " : " + response.ResultMessage);
-			
-			window.location.href = "<?php echo $url_second_step.'&Order='.$order_id.'&Answer=' ?>"+response.AuthorizationKey;
-		}
-		
-		function billeteraPaymentResponse(response) {
-			console.log("My wallet callback");
-			console.log(response.ResultCode + " : " + response.ResultMessage);
-            
-            if (response.AuthorizationKey) {
-				window.location.href = "<?php echo $url_second_step.'&Order='.$order_id.'&Answer=' ?>"+response.AuthorizationKey;
-			} else {
-				window.location.href = "<?php echo $url_second_step.'&Order='.$order_id.'&ResultMessage=' ?>"+response.ResultMessage;
-			}
-		}
+        /************* SETEO UN ITEM PARA COMPRAR ******************/
+        window.TPFORMAPI.hybridForm.setItem({
+            publicKey: publicRequestKey,
+            defaultNombreApellido: '<?php echo $completeName; ?>',
+            defaultNumeroDoc: '',
+            defaultMail: '<?php echo $mail; ?>',
+            defaultTipoDoc: 'DNI'
+        });
+    }
 
-		function customPaymentErrorResponse(response) {
-			console.log("Mi custom payment error callback");
-			console.log(response.ResultCode + " : " + response.ResultMessage);
-			console.log(response);
-			
-			if (response.AuthorizationKey) {
-				window.location.href = "<?php echo $url_second_step.'&Order='.$order_id.'&Answer=' ?>"+response.AuthorizationKey;
-			} else {
-				window.location.href = "<?php echo $url_second_step.'&Order='.$order_id.'&ResultMessage=' ?>"+response.ResultMessage;
-			}
-		}
-		function initLoading() {
-			console.log('Cargando');
-		}
-		function stopLoading() {
-			console.log('Stop loading...');
-		} 	
+    /************ FUNCIONES CALLBACKS ************/
+
+    function validationCollector(parametros) {
+        console.log("Validando los datos");
+        console.log(parametros.field + " -> " + parametros.error);
+        var input = parametros.field;
+        if (input.search("Txt") !== -1) {
+            label = input.replace("Txt", "Lbl");
+        } else {
+            label = input.replace("Cbx", "Lbl");
+        }
+        document.getElementById(label).innerHTML = parametros.error;
+    }
 
 
+    function billeteraPaymentResponse(response) {
+        console.log("Iniciando billetera");
+        console.log(response.ResultCode + " -> " + response.ResultMessage);
+        if (response.AuthorizationKey) {
+            window.location.href = "<?php echo $url_second_step.'&Order='.$order_id.'&Answer=' ?>" + response.AuthorizationKey;
+        } else {
+            window.location.href = "<?php echo $url_second_step.'&Order='.$order_id.'&ResultMessage=' ?>" + response.ResultMessage;
+        }
+    }
+
+    function customPaymentSuccessResponse(response) {
+        console.log("Success");
+        console.log(response.ResultCode + " -> " + response.ResultMessage);
+        window.location.href = "<?php echo $url_second_step.'&Order='.$order_id.'&Answer=' ?>" + response.AuthorizationKey;
+    }
+
+    function customPaymentErrorResponse(response) {
+        console.log(response.ResultCode + " -> " + response.ResultMessage);
+        if (response.AuthorizationKey) {
+            window.location.href = "<?php echo $url_second_step.'&Order='.$order_id.'&Answer=' ?>" + response.AuthorizationKey;
+        } else {
+            window.location.href = "<?php echo $url_second_step.'&Order='.$order_id.'&ResultMessage=' ?>" + response.ResultMessage;
+        }
+    }
+
+    function initLoading() {
+        console.log('Loading...');
+    }
+
+    function stopLoading() {
+        console.log('Stop loading...');
+        var peiCbx = $("#peiCbx");
+        var rowPei = $("#row-pei");
+        if (peiCbx.css('display') !== 'none') {
+            rowPei.show('fast');
+        } else {
+            rowPei.css("display", "none");
+        }
+    }
 </script>
-<style type="text/css">
-
-		#tp-logo{
-			background-image: url("https://portal.todopago.com.ar/app/images/logo.png");
-			background-repeat: no-repeat;
-			height:40px;
-			width:110px;
-			margin: 0 0 0 14px;
-		}
-	</style>

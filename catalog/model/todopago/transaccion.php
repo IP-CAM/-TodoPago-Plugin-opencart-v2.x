@@ -8,7 +8,6 @@ class ModelTodopagoTransaccion extends Model {
 
     private function getTransaction($orderId) {
         $query = $this->db->query("SELECT * FROM ".DB_PREFIX."todopago_transaccion WHERE id_orden = ".$orderId);
-
         return $query->row;
     }
 

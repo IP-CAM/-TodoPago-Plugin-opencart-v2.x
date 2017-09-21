@@ -13,7 +13,7 @@
         width: 100%;
         z-index: 1001;
     }
-    
+
     #popup_prod {
         left: 0;
         position: absolute;
@@ -21,7 +21,7 @@
         width: 100%;
         z-index: 1001;
     }
-    
+
     .content-popup {
         margin: 0px auto;
         margin-top: 130px;
@@ -33,14 +33,14 @@
         background-color: #FFFFFF;
         box-shadow: 0 2px 5px #666666;
     }
-    
+
     .content-popup h2 {
         color: #48484B;
         border-bottom: 1px solid #48484B;
         margin-top: 0;
         padding-bottom: 4px;
     }
-    
+
     .popup-overlay {
         left: 0;
         position: absolute;
@@ -52,29 +52,29 @@
         cursor: pointer;
         opacity: 0.7;
     }
-    
+
     .close {
         positio#logon: absolute;
         right: 15px;
     }
-    
+
     .content-popup img {
         position: relative;
         align-self: right;
     }
-    
+
     .content-popup button {
         position: relative;
         left: 25px;
         bottom: 50px;
     }
-    
+
     .content-popup #cancel {
         position: relative;
         left: 105px;
         bottom: 237px;
     }
-    
+
     .content-popup #cancel_prod {
         position: relative;
         left: 105px;
@@ -103,7 +103,7 @@
         </div>
     </div>
     <div class="container-fluid">
-        <?php if ($need_upgrade) {?>
+        <?php if ($need_upgrade) { ?>
         <div class="alert alert-warning"><i class="fa fa-exclamation-circle"></i>
             Usted ha subido una nueva versión del m&oacute;dulo, para su correcto funcionamiento debe actualizarlo haciendo click en el botón "Upgrade" indicado con el &iacute;cono <i class="fa <?php echo $button_save_class; ?>"></i>
             <button type="button" class="close" data-dismiss="alert">&times;</button>
@@ -223,7 +223,7 @@
                                 </div>
                             </div>
 
-        
+
                             <div class="form-group required">
                                 <label class="col-sm-2 control-label" for="todopago_maxinstallments">Máximo de cuotas</label>
                                 <div class="field col-sm-1">
@@ -235,7 +235,7 @@
                                 </div>
                                 <div class="field col-sm-4">
                                     <select class="form-control" name="todopago_maxinstallments" id="todopago_maxinstallments" disabled>
-                                    <?php  
+                                    <?php
                                     for ($i = 0; $i <= 12; $i++) { ?>
                                         <option value="<?php echo $i ?>"><?php echo $i ?></option> <?php
 
@@ -246,7 +246,7 @@
                                     ?>
                                     </select>
                                 </div>
-              
+
                                 <div class="info-field col-sm-5"><em>* Seleccione la cantidad máxima de cuotas</em>
                                 </div>
                             </div>
@@ -265,7 +265,7 @@
                                 <div class="field col-sm-4">
                                     <input type="number" min="300000" max="21600000" class="form-control" name="todopago_timeout_form" id="todopago_timeout_form" value="<?php echo $timeout; ?>" disabled />
                                 </div>
-              
+
                                 <div class="info-field col-sm-5"><em>* ingrese el tiempo de vida del formulario en ms (por defecto tiene el valor 1800000 Valor minimo: 300000 (5 minutos)
 Valor maximo: 21600000 (6hs))</em>
                                 </div>
@@ -296,6 +296,30 @@ Valor maximo: 21600000 (6hs))</em>
                                 <div class="info-field col-sm-5"><em>Ante un pago fallido se podrá elegir el comportamiento esperado, vaciando o no el carrito de compras.</em>
                                 </div>
 
+                            </div>
+
+                            <!-- Validar dirección con gmaps -->
+                            <div class="form-group required">
+                                <label class="col-sm-2 control-label" for="todopago_gmaps_validacion">¿Desea validar la dirección de compra con Google Maps?</label>
+                                <div class="field col-sm-5">
+                                    <select class="form-control" name="todopago_gmaps_validacion" id="todopago_gmaps_validacion">
+                                        <?php if ($todopago_gmaps_validacion) { ?>
+                                        <option value="1" selected="selected">
+                                            <?php echo $text_enabled; ?>
+                                        </option>
+                                        <option value="0">
+                                            <?php echo $text_disabled; ?>
+                                        </option>
+                                        <?php } else { ?>
+                                        <option value="1">
+                                            <?php echo $text_enabled; ?>
+                                        </option>
+                                        <option value="0" selected="selected">
+                                            <?php echo $text_disabled; ?>
+                                        </option>
+                                        <?php } ?>
+                                    </select>
+                                </div>
                             </div>
 
                         </div>
@@ -483,7 +507,7 @@ Valor maximo: 21600000 (6hs))</em>
 
                         </div>
                         <!-- END TAB ESTADO DEL PEDIDO -->
-                        
+
                         <!-- TAB STATUS-->
                         <div class="tab-pane" id="tab-status">
                             <table class="form" border="1">
@@ -578,7 +602,7 @@ modal.open();
                         $.post(url_devolver,{order_id: order_id, monto: monto}, llegadaDatosDevolucion );
                     }
                    return false;
-                }   
+                }
 
                 function llegadaDatosDevolucion(datos) {
                     $('#content').css('cursor', 'auto');
@@ -676,7 +700,7 @@ modal.open();
                     $('input:text[name=todopago_idsiteproduccion]').val('');
                     $('input:text[name=todopago_securityproduccion]').val('');
                 });
-                
+
                 var todopago_status = '<?php echo $todopago_status ?>';
                 if(todopago_status == 1){
                     $('#todopago_status').val('1');
@@ -685,27 +709,27 @@ modal.open();
             });
         </script>
         <?php echo $footer; ?>
-      
+
         <script>
 
         $(document).ready(function(){
-            if ($('#habilitar').attr('checked')) {    
+            if ($('#habilitar').attr('checked')) {
                 $("#todopago_maxinstallments").removeAttr("disabled");
-            
+
             }else{
-                $("#todopago_maxinstallments").val("0");   
-                                     
+                $("#todopago_maxinstallments").val("0");
+
             }
 
-            $("#habilitar").click(function() {  
+            $("#habilitar").click(function() {
 
                 if ($('#habilitar').prop('checked')) {
                     $("#todopago_maxinstallments").removeAttr("disabled");
 
                 }else
                 {
-                    $("#todopago_maxinstallments").prop('disabled', true);  
-                    $("#todopago_maxinstallments").val(""); 
+                    $("#todopago_maxinstallments").prop('disabled', true);
+                    $("#todopago_maxinstallments").val("");
 
                 }
 
@@ -713,9 +737,9 @@ modal.open();
 
 
             // CHECKBOX TIMEOUT FORM
-            if ($('#todopago_timeout_form_enabled').attr('checked')) {    
+            if ($('#todopago_timeout_form_enabled').attr('checked')) {
                 $("#todopago_timeout_form").removeAttr("disabled");
-                
+
             }
 
             $("#todopago_timeout_form_enabled").click(function() {
@@ -730,7 +754,7 @@ modal.open();
                     $("#todopago_timeout_form").prop('disabled', true);
                 }
 
-            });  
+            });
         });
 
         </script>

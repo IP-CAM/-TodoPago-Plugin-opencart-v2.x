@@ -1,0 +1,88 @@
+/* Hoja de estilo del formulario híbrido */
+@keyframes barFill {
+    0% {
+        width: 50%
+    }
+    100% {
+        width: 100%;
+    }
+}
+
+@keyframes barFillHalf {
+    0% {
+        width: 0;
+    }
+    100% {
+        width: 50%;
+    }
+}
+
+.formuHibrido button {
+    margin: 5px;
+}
+
+#tpForm {
+    opacity: 0;
+}
+
+.warning {
+    color: red;
+    padding: 1px;
+}
+
+.fail {
+    background-color: lightpink;
+    border-color: red;
+}
+
+.row {
+    min-height: 60px
+}
+
+#row-pei{
+    display: none
+}
+
+.input {
+    width: 100%;
+}
+
+.modal-class {
+}
+
+.loaded-form{
+    display: none;
+}
+
+.modal-content {
+}
+
+#peiLbl {
+    align-content: center;
+}
+
+
+
+#todopago_logo {
+    width: 110px;
+    height: 40px;
+    margin: 5px 5px;
+}
+
+#loading-hibrid {
+    width: 0;
+}
+
+.barFillerHalf {
+    animation-name: barFillHalf;
+    animation-duration: 1s;
+    animation-fill-mode: forwards;
+    animation-iteration-count: 1;
+}
+
+.barFiller {
+    animation-name: barFill;
+    animation-duration: 1s;
+    animation-fill-mode: forwards;
+    animation-iteration-count: 1;
+}
