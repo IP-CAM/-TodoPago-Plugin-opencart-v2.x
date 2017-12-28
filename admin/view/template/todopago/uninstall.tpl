@@ -10,17 +10,17 @@
    <div class="container-fluid">
        <div class="panel panel-danger">
            <div class="panel-heading">
-                <h3 class="panel-title"><i class="fa fa-minus-circle"></i> Desinstalaci&oacute;n de la exteci&oacute;n.</h3>
+                <h3 class="panel-title"><i class="fa fa-minus-circle"></i> Desinstalaci&oacute;n de la extensi&oacute;n.</h3>
            </div>
            <div class="panel-body">
                 <p>Seleccione los campos :</p>
               <form id="form" action="<?php echo $button_continue_action; ?>" method="post" enctype="smultipart/form-data">
                 <ul>
                    <li>
-                    <input type="checkbox" checked="true" id="check_todopago_transaccion" name="drop_table_todopago_transaccion"> Eliminar tabla <em>todopago_transaccion</em>, esta lleva un registro de las transacciones hechas con el medio de pago en caso de hacerlo, ya no podr&aacute; hacer un get status de las transacciones guardadas si reinstala el plugin (Las transacciones se mantendr&aacute;n en el registro del commerce, seleccionelo si est&aacute; seguro de que no volvera a instalar el medio.</input>
+                    <input type="checkbox" checked="true" id="check_todopago_transaccion" name="drop_table_todopago_transaccion"> Eliminar tabla <em>todopago_transaccion</em>, esta lleva un registro de las transacciones hechas con el medio de pago en caso de hacerlo, ya no podr&aacute; hacer un get status de las transacciones guardadas si reinstala el plugin (Las transacciones se mantendr&aacute;n en el registro del ecommerce, seleccionelo si est&aacute; seguro de que no volver&aacute; a instalar el medio.</input>
                    </li>
                     <li>
-                        <input type="checkbox" checked="true" id="check_postcode_required" name="revert_postcode_required"> Se setear&aacute; el c&oacute;digo postal como no obligatorio para Argentina. (Cuando se instal&oacute; la exensi&oacute;n este se puso obolgatorio)</input></li>
+                        <input type="checkbox" checked="true" id="check_postcode_required" name="revert_postcode_required"> Se setear&aacute; el c&oacute;digo postal como no obligatorio para Argentina. (Cuando se instal&oacute; la extensi&oacute;n este se puso obligatorio)</input></li>
                     <li><input type="checkbox" checked="true" id="check_cs_code" name="drop_column_cs_code"> Se eliminar&aacute; la columna agregada a la tabla de zonas que tiene el c&oacute;digo de las provincias argentinas necesario para el pago por este medio.</input></li>
                     </ul>
                 </form>

@@ -16,9 +16,9 @@ class ModelPaymentTodopago extends Model {
 	}
 
     public function getVersion(){
-        $actualVersion = $this->config->get('todopago_version');
         $actualVersion = ($this->config->has('todopago_version'))? $this->config->get('todopago_version') : '0.0.0';
-	   return $actualVersion;
+        $this->logger->debug("TodoPago model->getVersion(): " . $actualVersion);
+        return $actualVersion;
     }
 
     public function setProvincesCode(){

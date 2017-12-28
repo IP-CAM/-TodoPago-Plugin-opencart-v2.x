@@ -1,33 +1,58 @@
 <link href="catalog/view/theme/default/stylesheet/todopago_form.css" rel="stylesheet">
 
-<div  class="pull-right button">
-    <input type="button" id="comenzar_pago_btn" onclick="init_my_form()" class="btn btn-primary" value="Comenzar Pago"></button>
+<div class="pull-right button">
+    <input type="button" id="comenzar_pago_btn" onclick="init_my_form()" class="btn btn-primary"
+           value="Comenzar Pago"></button>
 </div>
-
 <script type="text/javascript">
+    function parseAnswerSAR(data) {
+        var response;
+        try {
+            response = JSON.parse(data);
+        } catch (e) {
+            console.log("ERROR:" + e);
+            response = false;
+        }
+        return response;
+    }
+    function sliceAnswerSAR(data) {
+        var pos = data.indexOf('<?php echo $bracket; ?>');
+        var response = data.slice(pos);
+        console.log(response);
+        response = parseAnswerSAR(response);
+        if (response === false) {
+            window.location.href = "<?php echo $url_fail_page; ?>"
+        } else {
+            return response;
+        }
+    }
+
+
     function init_my_form() {
-        $.post( "<?php echo $action; ?>", {order_id: <?php echo($order_id); ?> }).done(function(data) {
+        $.post("<?php echo $action; ?>", {order_id: <?php echo($order_id); ?> }).done(function (data) {
             loadScript('<?php echo $script; ?>', function () {
                 if (data) {
-                    try {
-                        var response = JSON.parse(data);
-                        console.log(response);
-                        if (response.hasOwnProperty('PublicRequestKey'))
-                            loader(response.PublicRequestKey);
-                        else
-                            window.location.href = response.URL_ErrorPageHybrid;
-                    } catch(e) {
+                    console.log(data);
+                    var response = parseAnswerSAR(data);
+                    if (response === false) {
+                        response = sliceAnswerSAR(data);
+                    }
+                    if (response.StatusCode === 702 || response === false) {
                         console.log(e); // error in the above string (in this case, yes)!
                         window.location.href = "<?php echo $url_fail_page; ?>"
                     }
-                } else {
-                    window.location.href = "<?php echo $url_fail_page; ?>"
+                    if (response.hasOwnProperty('PublicRequestKey')) {
+                        loader(response.PublicRequestKey);
+                    } else {
+                        window.location.href = response.URL_ErrorPageHybrid;
+                    }
                 }
             });
         });
 
         $("#loading-hibrid").css("width", "33%");
-        $("#formulario_hibrido").show();
+        $("#contenedor-formulario").show('slow');
+        $("#tp-form").css("opacity", 0);
         $("#comenzar_pago_btn").hide();
         $("#progress").show();
     }
@@ -40,91 +65,132 @@
     </div>
 </div>
 
-<div id="formulario_hibrido" hidden>
-    <div class="formuHibrido container-fluid" id="tpForm">
-        <img src="https://portal.todopago.com.ar/app/images/logo.png" alt="todopago" id="todopago_logo">
-        <!-- row  1 -->
-        <div class="row">
-            <div class="col-md-2">
-                <select id="formaPagoCbx" class="input form-control"></select>
-            </div>
-            <div class="loaded-form">
-                <div class="col-md-4">
-                    <input id="numeroTarjetaTxt" class="input form-control">
-                    <label id="numeroTarjetaLbl" for="numeroTarjetaTxt" class="warning"></label>
-                </div>
-                <div class="col-md-6 nombreTexto">
-                    <input id="nombreTxt" class="input form-control">
-                </div>
+<!-- inicio formulario -->
+<div id="contenedor-formulario">
+    <div class="formu-hibrido container-fluid" id="tp-form">
+        <img src="https://portal.todopago.com.ar/app/images/logo.png" alt="todopago" id="todopago-logo">
+        <div class="tp-container">
+            <div id="tp-container-billetera">
+                <span class="tp-title">Pagá con tu Billetera Virtual Todo Pago y evitá cargar los datos de tu tarjeta.</span>
+                <button id="MY_btnPagarConBilletera" class="tp-btn tp-pull-right tp-button-billetera">Iniciar sesión
+                </button>
             </div>
         </div>
-
+        <!-- row  1 -->
+        <div class="row">
+            <select id="formaPagoCbx" class="tp-input "></select>
+        </div>
         <div class="loaded-form">
-            <div class="row" id="row-pei">
-                <div class="col-md-6 col-md-offset-2">
-                    <div class="form-horizontal">
-                        <div class="checkbox">
-                            <input id="peiCbx" type="checkbox">
-                            <label id="peiLbl" for="peiCbx"></label>
+            <div class="tp-container">
+                <div class="tp-row">
+                    <span class="tp-title">Pagar con tu tarjeta de débito o crédito</span>
+                </div>
+                <div class="tp-row" id="row-pei">
+                    <div class="tp-col-2">
+                        <div class="switch" id="switch-pei">
+                            <input id="peiCbx" class="pull-left" type="checkbox">
+                            <span class="slider round"></span>
+                        </div>
+                    </div>
+                    <div class="tp-col-4">
+                        <label id="peiLbl" for="peiCbx"></label>
+                    </div>
+                </div>
+                <div class="tp-container-2-columns">
+                    <div class="tp-col tp-col-sm-4 tp-col-left">
+                        <!-- row 1 -->
+                        <div class="tp-row">
+                            <input id="numeroTarjetaTxt" class="tp-input" tabindex="1">
+                            <label id="numeroTarjetaLbl" for="numeroTarjetaTxt" class="warning"></label>
+                        </div>
+                        <!-- row 2 -->
+                        <div class="tp-row">
+                            <div class="tp-col tp-col-2">
+                                <select id="mesCbx" class="tp-input" tabindex="2"></select>
+                            </div>
+                            <div class="tp-col tp-col-2">
+                                <select id="anioCbx" class="tp-input" tabindex="3"></select>
+                            </div>
+                            <div class="tp-col tp-col-4">
+                                <input id="codigoSeguridadTxt" class="tp-input" tabindex="4">
+                            </div>
+                        </div>
+                        <!-- error row 2 -->
+                        <div class="tp-row-error">
+                            <div class="tp-col tp-col-4">
+                                <label for="anioCbx" id="fechaLbl" class="warning"></label>
+                            </div>
+                            <div class="tp-col tp-col-4">
+                                <label id="codigoSeguridadLbl" for="codigoSeguridadTxt" class="warning"></label>
+                            </div>
+                        </div>
+                        <!-- row 3 -->
+                        <div class="tp-row">
+                            <input id="nombreTxt" class="tp-input" tabindex="5">
+                        </div>
+                        <!-- error row 3 -->
+                        <div class="tp-row-error">
+                            <label for="nombreTxt" id="nombreLbl" class="warning"></label>
+                        </div>
+                        <!-- row 4 -->
+                        <div class="tp-row">
+                            <select id="promosCbx" class="tp-input"></select>
+                        </div>
+                        <!-- row 5 -->
+                        <div class="tp-row">
+                            <input id="tokenPeiTxt" class="tp-input ">
+                            <label id="tokenPeiLbl" for="tokenPeiTxt" class="warning"></label>
+                        </div>
+                    </div>
+                    <div class="tp-col tp-col-sm-4 tp-col-right">
+                        <!-- row 1 -->
+                        <div class="tp-row">
+                            <div class="tp-col-4">
+                                <select id="medioPagoCbx" class="tp-input "></select>
+                            </div>
+                            <div class="tp-col-4">
+                                <select id="bancoCbx" class="tp-input "></select>
+                            </div>
+                        </div>
+                        <!-- row 2 -->
+                        <div class="tp-row">
+                            <div class="tp-col-2">
+                                <select id="tipoDocCbx" class="tp-input "></select>
+                            </div>
+                            <div class="tp-col-6">
+                                <input id="nroDocTxt" class="tp-input" tabindex="6">
+                            </div>
+                        </div>
+                        <!-- error row 2 -->
+                        <div class="tp-row-error">
+                            <div class="tp-col-2">
+                            </div>
+                            <div class="tp-col-6">
+                                <label for="nroDocTxt" id="nroDocLbl" class="warning"></label>
+                            </div>
+                        </div>
+                        <!-- row 3 -->
+                        <div class="tp-row">
+                            <input id="emailTxt" class="tp-input ">
+                        </div>
+                        <!-- error row 3 -->
+                        <div class="tp-row-error">
+                            <label for="emailTxt" id="emailLbl" class="warning"></label>
+                        </div>
+                        <!-- row 4 -->
+                        <div class="tp-row">
+                            <label id="promosLbl" class="tp-cft" for="promosCbx"></label>
+                        </div>
+                        <!-- row 5-->
+                        <div class="tp-row">
+                            <button id="MY_btnConfirmarPago" class="tp-btn tp-btn-pagar pull-right"></button>
                         </div>
                     </div>
                 </div>
             </div>
-            <!-- row 2 -->
-            <div class="row">
-                <div class="col-md-2">
-                    <select id="medioPagoCbx" class="input form-control"></select>
-                </div>
-                <div class="col-md-4">
-                    <select id="bancoCbx" class="input form-control"></select>
-                </div>
-                <div class="col-md-2">
-                    <select id="tipoDocCbx" class="input form-control"></select>
-                </div>
-                <div class="col-md-4">
-                    <input id="nroDocTxt" class="input form-control">
-                </div>
-            </div>
-            <!-- row 3 -->
-            <div class="row">
+        </div>
+        <!-- row 5 -->
 
-                <div class="col-md-2">
-                    <select id="mesCbx" class="input form-control"></select>
-                </div>
-                <div class="col-md-2">
-                    <select id="anioCbx" class="input form-control"></select>
-                    <label id="fechaLbl" class="warning"></label>
-                </div>
-                <div class="col-md-2">
-                    <input id="codigoSeguridadTxt" class="input form-control">
-                    <label id="codigoSeguridadLbl" for="codigoSeguridadTxt" class="warning"></label>
-                </div>
-                <div class="col-md-6">
-                    <input id="emailTxt" class="input form-control">
-                </div>
-            </div>
-            <!-- row 4 -->
-            <div class="row">
-                <div class="col-md-6">
-                    <select id="promosCbx" class="input form-control"></select>
-                </div>
-                <div class="col-md-3">
-                    <input id="tokenPeiTxt" class="input form-control">
-                    <label id="tokenPeiLbl" for="tokenPeiTxt" class="warning"></label>
-                </div>
-            </div>
-            <!-- row 5 -->
-            <div class="row">
-                <div class="col-md-2">
-                    <label id="promosLbl" for="promosCbx"></label>
-                </div>
-            </div>
-        </div>
-        <!-- row 6 -->
-        <div class="row">
-            <button id="MY_btnPagarConBilletera" class="btn btn-primary pull-right"></button>
-            <button id="MY_btnConfirmarPago" class="btn btn-primary pull-right"></button>
-        </div>
     </div>
 </div>
 
@@ -134,6 +200,8 @@
     function loadScript(url, callback) {
         var script = document.createElement("script");
         script.type = "text/javascript";
+        script.src = url;
+
         if (script.readyState) {  //IE
             script.onreadystatechange = function () {
                 if (script.readyState === "loaded" || script.readyState === "complete") {
@@ -149,18 +217,34 @@
                 window.location.href = "<?php echo $url_second_step.'&Order='.$order_id.'&ResultMessage=' ?>" + "Falló la carga del formulario.";
             }
         }
-        script.src = url;
+
         document.getElementsByTagName("head")[0].appendChild(script);
     }
 
     var formaDePago = document.getElementById("formaPagoCbx");
+    var peiChk = $("#peiCbx");
+
     formaDePago.addEventListener("click", function () {
         if (formaDePago.value === "1") {
             $(".loaded-form").show('fast');
         } else {
             $(".loaded-form").hide('fast');
+            $("#switch-pei").css("display", "none");
         }
     });
+    
+    function initialFormaDePago() {
+        if (formaDePago.value === "1") {
+            $(".loaded-form").show('fast');
+        }
+    }
+
+    function desplegarForm() {
+        if (formaDePago.value === "1") {
+            $(formaDePago).hide('fast');
+            $(".loaded-form").show('fast');
+        }
+    }
 
     formaDePago.addEventListener('blur', function () {
         setTimeout(function () {
@@ -168,11 +252,14 @@
         }, 200);
     });
 
+    function getInitialPEIState() {
+        return (peiChk.is(":disabled"));
+    }
+
     function peiLabelLoader() {
         console.log($("#peiCbx").css('display'));
-
     }
-    
+
     function loader(publicRequestKey) {
         $("#loading-hibrid").css("width", "66%");
         setTimeout(function () {
@@ -183,10 +270,25 @@
         }, 1000);
         setTimeout(function () {
             $(".progress").hide('fast');
+            initialFormaDePago();
         }, 1500);
         setTimeout(function () {
-            $("#tpForm").fadeTo('fast', 1);
+            $("#tp-form").fadeTo('fast', 1);
+            desplegarForm();
         }, 1700);
+    }
+
+    function activateSwitch(soloPEI) {
+        console.log("Solo PEI: " + soloPEI);
+        if (!soloPEI) {
+            $("#switch-pei").click(function () {
+                if (!peiChk.prop("checked")) {
+                    peiChk.prop("checked", true);
+                } else {
+                    peiChk.prop("checked", false);
+                }
+            });
+        }
     }
 
     function ignite(publicRequestKey) {
@@ -224,7 +326,8 @@
         } else {
             label = input.replace("Cbx", "Lbl");
         }
-        document.getElementById(label).innerHTML = parametros.error;
+        if (document.getElementById(label) !== null)
+            document.getElementById(label).innerHTML = parametros.error;
     }
 
 
@@ -263,6 +366,9 @@
         var rowPei = $("#row-pei");
         if (peiCbx.css('display') !== 'none') {
             rowPei.show('fast');
+            switchPei = $("#switch-pei");
+            switchPei.css("display", "block");
+            activateSwitch(getInitialPEIState());
         } else {
             rowPei.css("display", "none");
         }

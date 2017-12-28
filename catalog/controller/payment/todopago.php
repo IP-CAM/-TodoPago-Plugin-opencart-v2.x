@@ -32,6 +32,7 @@ class ControllerPaymentTodopago extends Controller
         else
             $data['script'] = 'https://forms.todopago.com.ar/resources/v2/TPBSAForm.min.js';
 
+        $data['bracket'] = '{';
         $this->load->language('payment/todopago');
         $this->load->model($this->tp_routes['model'] . '/transaccion');
         $this->load->model($this->tp_routes['payment-module']);
@@ -558,6 +559,16 @@ class ControllerPaymentTodopago extends Controller
         $timeout = $this->config->get('todopago_timeout_form');
         if ($timeout != null) {
             $paydata_operation['TIMEOUT'] = $this->config->get('todopago_timeout_form');
+        }
+
+        $paydata_operation['ECOMMERCENAME'] = "OPENCART";
+        $paydata_operation['ECOMMERCEVERSION'] = VERSION;
+
+        $paydata_operation['PLUGINVERSION'] = $this->config->get('todopago_version');
+        if ($this->config->get('todopago_formulario') == "hibrid"){
+            $paydata_operation['PLUGINVERSION'] .= "-H";
+        } else {
+            $paydata_operation['PLUGINVERSION'] .= "-E";
         }
 
         $paydata_operation = array_merge($paydata_operation, $controlFraude);

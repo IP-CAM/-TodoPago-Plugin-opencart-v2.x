@@ -30,6 +30,8 @@ class ControllerPaymentTodopago extends Controller
 
     public function confirm_installation()
     {
+        $this->load->model($this->tp_routes['payment-module']);
+
         //Preparo tpl
         $data['header'] = $this->load->controller("common/header");
         $data['column_left'] = $this->load->controller("common/column_left");
@@ -38,7 +40,7 @@ class ControllerPaymentTodopago extends Controller
         $data['todopago_version'] = TP_VERSION;
         $data['install_button_text'] = 'Instalar';
         $data['cancel_button_text'] = 'Cancelar';
-        $data['install_button_action'] = html_entity_decode($this->url->link($this->tp_routes['payment-module'] . '/_install', 'action=' . self::INSTALL . '&token=' . $this->session->data['token'], 'SSL'));
+        $data['install_button_action'] = html_entity_decode($this->url->link($this->tp_routes['payment-module'] . '/_install', 'action=' . self::INSTALL . '&token=' . $this->session->data['token'] . '&pluginVersion=' . $this->model_payment_todopago->getVersion(), 'SSL'));
         $data['cancel_button_action'] = html_entity_decode($this->url->link($this->tp_routes['payment-extension'] . '/_revert_installation', 'token=' . $this->session->data['token'], 'SSL')); //Al llegar la pantalla ell plugin ya se instaló en el commerce por lo qe hace falta dsinstalarlo
         $data['back_button_message'] = "Esto interrumpirá la instalación";
         $data['visible_url'] = html_entity_decode($this->url->link($this->tp_routes['payment-module'] . '/install', 'token=' . $this->session->data['token'], 'SSL')); //Al llegar la pantalla ell plugin ya se instaló en el commerce por lo qe hace falta dsinstalarlo
@@ -120,6 +122,11 @@ class ControllerPaymentTodopago extends Controller
             case "1.9.0":
                 $this->logger->debug("Upgrade to v1.10.0");
             case "1.10.0":
+                $this->logger->debug("Upgrade to v1.11.0");
+            case "1.11.0":
+                $this->logger->debug("Upgrade to v1.12.0");
+            case "1.12.0":
+                $this->logger->debug("Upgrade to v1.12.1");
                 $this->logger->info("Plugin instalado/upgradeado");
         }
     }
@@ -349,7 +356,6 @@ class ControllerPaymentTodopago extends Controller
         } else {
             $data['todopago_segmentodelcomercio'] = $this->config->get('todopago_segmentodelcomercio');
         }
-
 
 
         if (isset($this->request->post['todopago_canaldeingresodelpedido'])) {
@@ -587,59 +593,11 @@ class ControllerPaymentTodopago extends Controller
             $this->logger->info("GETSTATUS: " . $status_json);
             $rta = '';
 
-            $refunds = $status['Operations']['REFUNDS'];
-            $auxArray = array(
-                "REFUND" => $refunds
-            );
-
-            $aux = 'REFUND';
-            $auxColection = 'REFUNDS';
-
             if ($status) {
                 if (isset($status['Operations']) && is_array($status['Operations'])) {
-                    foreach ($status['Operations'] as $key => $value) {
-                        if (is_array($value) && $key == $auxColection) {
-                            $rta .= "$key: <br/>";
-                            foreach ($auxArray[$aux] as $key2 => $value2) {
-                                $rta .= $aux . " <br/>";
-                                if (is_array($value2)) {
-                                    foreach ($value2 as $key3 => $value3) {
-                                        if (is_array($value3)) {
-                                            foreach ($value3 as $key4 => $value4) {
-                                                $complete_value = json_encode($value4);
-                                                $complete_value = preg_replace_callback('/\\\\u(\w{4})/', function ($matches) {
-                                                    return html_entity_decode('&#x' . $matches[1] . ';', ENT_COMPAT, 'UTF-8');
-                                                }, $complete_value);
-                                                $rta .= "   - $key4: $complete_value <br/>";
-                                            }
-                                        } else {
-                                            $complete_value = json_encode($value3);
-                                            $complete_value = preg_replace_callback('/\\\\u(\w{4})/', function ($matches) {
-                                                return html_entity_decode('&#x' . $matches[1] . ';', ENT_COMPAT, 'UTF-8');
-                                            }, $complete_value);
-                                            $rta .= "   - $key3: $complete_value <br/>";
-                                        }
-                                    }
-                                } else {
-                                    $complete_value = json_encode($value2);
-                                    $complete_value = preg_replace_callback('/\\\\u(\w{4})/', function ($matches) {
-                                        return html_entity_decode('&#x' . $matches[1] . ';', ENT_COMPAT, 'UTF-8');
-                                    }, $complete_value);
-                                    $rta .= "   - $key2: $complete_value <br/>";
-                                }
-                            }
-                        } else {
-                            if (is_array($value)) {
-                                $rta .= "$key: <br/>";
-                            } else {
-                                $complete_value = json_encode($value);
-                                $complete_value = preg_replace_callback('/\\\\u(\w{4})/', function ($matches) {
-                                    return html_entity_decode('&#x' . $matches[1] . ';', ENT_COMPAT, 'UTF-8');
-                                }, $complete_value);
-                                $rta .= "$key: $complete_value <br/>";
-                            }
-                        }
-                    }
+                    
+                    $rta = $this->printGetStatus($status['Operations'], 0);
+
                 } else {
                     $rta = 'No hay operaciones para esta orden.';
                 }
@@ -658,6 +616,22 @@ class ControllerPaymentTodopago extends Controller
 
     }
 
+    private function printGetStatus($array, $indent) {
+        $rta = '';
+
+        foreach ($array as $key => $value) {
+            if ($key !== 'nil' && $key !== "@attributes") {
+                if (is_array($value) ){
+                    $rta .= str_repeat("-", $indent) . "$key: <br/>";
+                    $rta .= $this->printGetStatus($value, $indent + 2);
+                } else {
+                    $rta .= str_repeat("-", $indent) . "$key: $value <br/>";
+                }
+            }
+        }
+        
+        return $rta;
+    }
 
     private function get_authorizationHTTP()
     {

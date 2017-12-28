@@ -64,7 +64,7 @@ La configuración del Plug in esta dividido en 5 solapas (GENERAL, AMBIENTE TEST
 </br>
 
 <a name="maxcuotas"></a>
-####Configuración de Maximo de Cuotas
+#### Configuración de Maximo de Cuotas
 Se puede configurar la cantidad máxima de cuotas que ofrecerá el formulario de TodoPago con el campo cantidad máxima de cuotas. Para que se tenga en cuenta este valor se debe habilitar el campo Habilitar máximo de cuotas y tomará el valor fijado para máximo de cuotas. En caso que esté habilitado el campo y no haya un valor puesto para las cuotas se tomará el valor 12 por defecto.
 ![imagen de configuracion](https://raw.githubusercontent.com/TodoPago/imagenes/master/opencart20/open2-maxinstallments.png)
 </br>
@@ -73,7 +73,7 @@ Se puede configurar la cantidad máxima de cuotas que ofrecerá el formulario de
 </br>
 
 <a name="timeout"></a>
-####Configuración de tiempo de vida del formulario
+#### Configuración de tiempo de vida del formulario
 En la configuracion del plugin se puede setear el tiempo maximo en el que se puede realizar el pago del formulario en milisegundos. Por defecto si no se envia, 1800000 (30 minutos)
 Valor minimo: 300000 (5 minutos)
 Valor maximo: 21600000 (6hs)
