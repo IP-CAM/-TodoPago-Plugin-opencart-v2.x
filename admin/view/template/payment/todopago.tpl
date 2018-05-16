@@ -80,11 +80,22 @@
         left: 105px;
         bottom: 237px;
     }
+
+    .github-message {
+        display: none;
+    }
 </style>
 <?php echo $header; ?>
 <?php echo $column_left; ?>
 <div id="content">
     <div class="page-header">
+
+        <div class="container-fluid">
+            <div class="alert alert-warning github-message">
+                <p>Se encuentra disponible una versión más reciente del plugin de Todo Pago, puede consultarla desde <a href="https://github.com/TodoPago/Plugin-opencart2" target="_blank">aquí</a>.</p>
+            </div>
+        </div>
+
         <div class="container-fluid">
             <h1>Todo Pago (<?php echo $todopago_version; ?>)</h1>
             <div class="pull-right">
@@ -595,7 +606,7 @@ modal.open();
         <script type="text/javascript">
             <!--
                 function devolver(order_id){
-                   var monto = prompt("Monto a parcial devolver (valor real del producto, sin el costo adicional) o vacío para devolución total (ej: 1.23): ", "");
+                   var monto = prompt("Monto parcial a devolver (valor real del producto, sin el costo adicional) o vacío para devolución total (ej: 1.23): ", "");
                    if (monto !== null) {
                         $('#content').css('cursor', 'progress');
                         var url_devolver = '<?php echo $url_devolver ?>';
@@ -755,6 +766,44 @@ modal.open();
                 }
 
             });
+
+            $.ajax({
+                method: "GET",
+                url: "https://api.github.com/repos/TodoPago/Plugin-OpenCart2/releases/latest",
+                headers: { 'Authorization': 'token 21600a0757d4b32418c54e3833dd9d47f78186b4' }
+            }).done(function(response){
+                var versionActual = '<?php echo $todopago_version; ?>';
+                versionActual = versionActual.replace(/[^0-9.]/g, '');
+                
+                var versionProdHuman = response.tag_name;
+                var versionProd = response.tag_name;
+                versionProd=versionProd.replace(/[^0-9.]/g, '');
+
+                if (versionCompare(versionProd, versionActual) > 0) {
+                    $('.github-message').show();
+                    $('#tp_configuracion_version_produccion').text(versionProdHuman);
+                }
+            });
+
+            versionCompare = function(left, right) {
+                if (typeof left + typeof right != 'stringstring')
+                    return false;
+
+                var a = left.split('.')
+                    ,   b = right.split('.')
+                    ,   i = 0, len = Math.max(a.length, b.length);
+
+                for (; i < len; i++) {
+                    if ((a[i] && !b[i] && parseInt(a[i]) > 0) || (parseInt(a[i]) > parseInt(b[i]))) {
+                        return 1;
+                    } else if ((b[i] && !a[i] && parseInt(b[i]) > 0) || (parseInt(a[i]) < parseInt(b[i]))) {
+                        return -1;
+                    }
+                }
+
+                return 0;
+            }
+
         });
 
         </script>

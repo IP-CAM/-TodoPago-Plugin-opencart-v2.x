@@ -1,58 +1,33 @@
 <link href="catalog/view/theme/default/stylesheet/todopago_form.css" rel="stylesheet">
 
-<div class="pull-right button">
-    <input type="button" id="comenzar_pago_btn" onclick="init_my_form()" class="btn btn-primary"
-           value="Comenzar Pago"></button>
+<div  class="pull-right button">
+    <input type="button" id="comenzar_pago_btn" onclick="init_my_form()" class="btn btn-primary" value="Comenzar Pago"></button>
 </div>
+
 <script type="text/javascript">
-    function parseAnswerSAR(data) {
-        var response;
-        try {
-            response = JSON.parse(data);
-        } catch (e) {
-            console.log("ERROR:" + e);
-            response = false;
-        }
-        return response;
-    }
-    function sliceAnswerSAR(data) {
-        var pos = data.indexOf('<?php echo $bracket; ?>');
-        var response = data.slice(pos);
-        console.log(response);
-        response = parseAnswerSAR(response);
-        if (response === false) {
-            window.location.href = "<?php echo $url_fail_page; ?>"
-        } else {
-            return response;
-        }
-    }
-
-
     function init_my_form() {
-        $.post("<?php echo $action; ?>", {order_id: <?php echo($order_id); ?> }).done(function (data) {
+        $.post( "<?php echo $action; ?>", {order_id: <?php echo($order_id); ?> }).done(function(data) {
             loadScript('<?php echo $script; ?>', function () {
                 if (data) {
-                    console.log(data);
-                    var response = parseAnswerSAR(data);
-                    if (response === false) {
-                        response = sliceAnswerSAR(data);
-                    }
-                    if (response.StatusCode === 702 || response === false) {
+                    try {
+                        var response = JSON.parse(data);
+                        console.log(response);
+                        if (response.hasOwnProperty('PublicRequestKey'))
+                            loader(response.PublicRequestKey);
+                        else
+                            window.location.href = response.URL_ErrorPageHybrid;
+                    } catch(e) {
                         console.log(e); // error in the above string (in this case, yes)!
                         window.location.href = "<?php echo $url_fail_page; ?>"
                     }
-                    if (response.hasOwnProperty('PublicRequestKey')) {
-                        loader(response.PublicRequestKey);
-                    } else {
-                        window.location.href = response.URL_ErrorPageHybrid;
-                    }
+                } else {
+                    window.location.href = "<?php echo $url_fail_page; ?>"
                 }
             });
         });
 
         $("#loading-hibrid").css("width", "33%");
-        $("#contenedor-formulario").show('slow');
-        $("#tp-form").css("opacity", 0);
+        $("#formulario_hibrido").show();
         $("#comenzar_pago_btn").hide();
         $("#progress").show();
     }
@@ -65,143 +40,297 @@
     </div>
 </div>
 
-<!-- inicio formulario -->
-<div id="contenedor-formulario">
-    <div class="formu-hibrido container-fluid" id="tp-form">
-        <img src="https://portal.todopago.com.ar/app/images/logo.png" alt="todopago" id="todopago-logo">
-        <div class="tp-container">
-            <div id="tp-container-billetera">
-                <span class="tp-title">Pagá con tu Billetera Virtual Todo Pago y evitá cargar los datos de tu tarjeta.</span>
-                <button id="MY_btnPagarConBilletera" class="tp-btn tp-pull-right tp-button-billetera">Iniciar sesión
+<div class="tp_wrapper" id="tpForm">
+
+    <section class="tp-total tp-flex">
+        <div>
+            <strong>Total a pagar $<?php echo number_format($ordertotal, 2, '.', ''); ?></strong>
+        </div>
+        <div>
+            Elegí tu forma de pago
+        </div>
+    </section>
+
+    <section class="billetera_virtual_tp tp-flex tp-flex-responsible">
+        <div class="tp-flex-grow-1 tp-bloque-span texto_billetera_virtual text_size_billetera">
+            <p>Pagá con tu <strong>Billetera Virtual Todo Pago</strong></p>
+            <p>y evitá cargar los datos de tu tarjeta</p>
+        </div>
+        <div class="tp-flex-grow-1 tp-bloque-span">
+            <button id="btn_Billetera" title="Pagar con Billetera" class="tp_btn tp_btn_sm text_size_billetera">
+                Iniciar Sesión
+            </button>
+        </div>
+    </section>
+
+    <section class="billeterafm_tp">
+        <div class="field field-payment-method">
+            <label for="formaPagoCbx" class="text_small">Forma de Pago</label>
+            <div class="input-box">
+                <select id="formaPagoCbx" class="tp_form_control"></select>
+                <span class="tp-error" id="formaPagoCbxError"></span>
+            </div>
+        </div>
+    </section>
+
+    <section class="billetera_tp">
+        <div class="tp-row">
+            <p>
+                Con tu tarjeta de crédito o débito
+            </p>
+        </div>
+        <!-- Número de tarjeta y banco -->
+        <div class="tp-bloque-full tp-flex tp-flex-responsible tp-main-col">
+            <!-- Tarjeta -->
+            <div class="tp-flex-grow-1">
+                <label for="numeroTarjetaTxt" class="text_small">Número de Tarjeta</label>
+                <input id="numeroTarjetaTxt" class="tp_form_control" maxlength="19" title="Número de Tarjeta"
+                       min-length="14" autocomplete="off">
+                <img src="catalog/view/theme/default/image/empty.png" id="tp-tarjeta-logo"
+                     alt="" />
+                <!-- <span class="error" id="numeroTarjetaTxtError"></span> -->
+                <label id="numeroTarjetaLbl" class="tp-error"></label>
+            </div>
+            <!-- Banco -->
+            <div class="tp-flex-grow-1">
+                <label for="bancoCbx" class="text_small">Banco</label>
+                <select id="bancoCbx" class="tp_form_control" placeholder="Selecciona banco"></select>
+                <span class="tp-error" id="bancoCbxError" />
+            </div>
+            <div class="tp_col tp-bloque-span payment-method">
+                <label for="medioPagoCbx" class="text_small">Medio de Pago</label>
+                <select id="medioPagoCbx" class="tp_form_control" placeholder="Mediopago"></select>
+                <span class="tp-error" id="medioPagoCbxError"></span>
+            </div>
+        </div>
+
+        <div class="tp-row tp-bloque-full tp-flex tp-flex-responsible tp-main-col" id="pei-block">
+            <section id="peibox">
+                <label id="peiLbl" for="peiCbx" class="text_small right">Pago con PEI</label>
+                <label class="switch" id="switch-pei">
+                    <input type="checkbox" id="peiCbx">
+                    <span class="slider round"></span>
+                    <span id="slider-text"></span>
+                </label>
+            </section>
+        </div>
+
+        <!--div class="tp_row">
+            <div class="tp_col tp-bloque-span">
+                <label for="medioPagoCbx" class="text_small">Medio de Pago</label>
+                <select id="medioPagoCbx" class="tp_form_control" placeholder="Mediopago"></select>
+                <span class="error" id="medioPagoCbxError"></span>
+            </div>
+        </div-->
+        <!-- Vencimiento + DNI-->
+        <div class="tp-bloque-full tp-flex tp-flex-row tp-flex-responsible tp-flex-space-between tp-main-col">
+            <!-- vencimiento -->
+            <div class="tp-flex-grow-1 tp-flex tp-flex-col">
+                <!-- títulos -->
+                <div class="tp-row tp-flex tp-flex-space-between tp-title">
+                    <div class="tp-flex-grow-1">
+                        <label for="mesCbx" class="text_small">Vencimiento</label>
+                    </div>
+                    <div class="tp-flex-grow-1">
+                    </div>
+                    <div class="tp-flex-grow-1">
+                        <label for="codigoSeguridadTxt" class="text_small">Código de Seguridad</label>
+                    </div>
+                </div>
+                <!-- inputs -->
+                <div class="tp-row tp-flex tp-flex-space-between tp-input-row">
+                    <div class="tp-flex-grow-1">
+                        <select id="mesCbx" maxlength="2" class="tp_form_control" placeholder="Mes"></select>
+                    </div>
+                    <div class="tp-flex-grow-1">
+                        <select id="anioCbx" maxlength="2" class="tp_form_control"></select>
+                    </div>
+                    <div class="tp-flex-grow-1">
+                        <input id="codigoSeguridadTxt" class="tp_form_control" maxlength="4" autocomplete="off" />
+                    </div>
+                    <div class="tp-cvv-helper-container">
+                        <div class="tp-anexo clave-ico" id="tp-cvv-caller"></div>
+                        <div id="tp-cvv-helper">
+                            <p>
+                                Para Visa, Master, Cabal y Diners, los 3 dígitos se encuentran en el <strong>dorso</strong>
+                                de
+                                tu tarjeta. (izq)
+                            </p>
+                            <p>
+                                Para Amex, los 4 dígitos se encuentran en el frente de tu tarjeta. (der)
+                            </p>
+                            <img id="tp-cvv-helper-img" alt="ilustración tarjetas" src="catalog/view/theme/default/image/clave-ej.png"/>
+                        </div>
+                    </div>
+                </div>
+                <!-- warnings -->
+                <div class="tp-row tp-flex tp-error-title">
+                    <label id="fechaLbl" class="left tp-error"></label>
+                    <span class="tp-error" id="codigoSeguridadTxtError"></span>
+                    <label id="codigoSeguridadLbl" class="left tp-label spacer tp-error"></label>
+                </div>
+            </div>
+            <!-- DNI -->
+            <div class="tp-flex-grow-1 tp-flex tp-flex-col">
+                <!-- títulos -->
+                <div class="tp-row tp-flex tp-flex-space-between tp-title">
+                    <div class="tp-flex-1">
+                        <label for="tipoDocCbx" class="text_small">Tipo</label>
+                    </div>
+                    <div class="tp-flex-3">
+                        <label for="NumeroDocCbx" class="text_small">Número</label>
+                    </div>
+                </div>
+                <!-- inputs -->
+                <div class="tp-row tp-flex tp-input-row">
+                    <div class="tp-flex-1">
+                        <select id="tipoDocCbx" class="tp_form_control"></select>
+                    </div>
+                    <div class="tp-flex-3" id="tp-dni-numero">
+                        <input id="nroDocTxt" maxlength="10" type="text" class="tp_form_control"
+                               autocomplete="off" />
+                    </div>
+                </div>
+                <!-- warnings -->
+                <div class="tp-row tp-flex tp-error-title">
+                    <div class="tp-flex-1">
+                    </div>
+                    <div class="tp-flex-3">
+                        <span class="tp-error" id="nroDocLbl"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Nombre y Apellido, y Mail -->
+        <div class="tp-bloque-full tp-flex tp-flex-responsible tp-main-col">
+            <div class="tp-flex-grow-1">
+                <label for="nombreTxt" class="text_small">Nombre y Apellido</label>
+                <input id="nombreTxt" class="tp_form_control" autocomplete="off" placeholder="" maxlength="50">
+                <span class="tp-error" id="nombreLbl"></span>
+            </div>
+            <div class="tp-flex-grow-1">
+                <label for="emailTxt" class="text_small">Email</label>
+                <input id="emailTxt" type="email" class="tp_form_control tp-input-row" placeholder="nombre@mail.com"
+                       data-mail=""
+                       autocomplete="off" />
+                <label id="emailLbl" class="left tp-label spacer tp-error"></label>
+            </div>
+        </div>
+
+        <!-- Cantidad de cuotas y CFT -->
+        <div class="tp-bloque-full tp-flex tp-main-col tp-flex-responsible">
+            <div class="tp-flex-grow-1">
+                <label for="promosCbx" class="text_small">Cantidad de cuotas</label>
+                <select id="promosCbx" class="tp_form_control"></select>
+                <span class="tp-error" id="promosCbxError"></span>
+            </div>
+            <div class="tp-flex-grow-1 tp-promo-cft">
+                <label id="promosLbl" class="left tp_form_control"></label>
+            </div>
+        </div>
+
+        <!-- Token de PEI -->
+        <div class="tp-bloque-full tp-flex tp-main-col tp-flex-responsible">
+            <div class="tp-flex-grow-1">
+                <label id="tokenPeiLbl" for="tokenPeiTxt" class="text_small"></label>
+                <input id="tokenPeiTxt" class="tp_form_control tp-input-row" />
+            </div>
+            <div class="tp-flex-grow-1">
+            </div>
+        </div>
+        
+        <!-- Pagar -->
+        <div class="tp_row">
+            <div class="tp_col tp_span_2_of_2">
+                <button id="btn_ConfirmarPago" class="tp_btn" title="Pagar" class="button">
+                    <span>Pagar</span>
                 </button>
             </div>
-        </div>
-        <!-- row  1 -->
-        <div class="row">
-            <select id="formaPagoCbx" class="tp-input "></select>
-        </div>
-        <div class="loaded-form">
-            <div class="tp-container">
-                <div class="tp-row">
-                    <span class="tp-title">Pagar con tu tarjeta de débito o crédito</span>
-                </div>
-                <div class="tp-row" id="row-pei">
-                    <div class="tp-col-2">
-                        <div class="switch" id="switch-pei">
-                            <input id="peiCbx" class="pull-left" type="checkbox">
-                            <span class="slider round"></span>
-                        </div>
-                    </div>
-                    <div class="tp-col-4">
-                        <label id="peiLbl" for="peiCbx"></label>
-                    </div>
-                </div>
-                <div class="tp-container-2-columns">
-                    <div class="tp-col tp-col-sm-4 tp-col-left">
-                        <!-- row 1 -->
-                        <div class="tp-row">
-                            <input id="numeroTarjetaTxt" class="tp-input" tabindex="1">
-                            <label id="numeroTarjetaLbl" for="numeroTarjetaTxt" class="warning"></label>
-                        </div>
-                        <!-- row 2 -->
-                        <div class="tp-row">
-                            <div class="tp-col tp-col-2">
-                                <select id="mesCbx" class="tp-input" tabindex="2"></select>
-                            </div>
-                            <div class="tp-col tp-col-2">
-                                <select id="anioCbx" class="tp-input" tabindex="3"></select>
-                            </div>
-                            <div class="tp-col tp-col-4">
-                                <input id="codigoSeguridadTxt" class="tp-input" tabindex="4">
-                            </div>
-                        </div>
-                        <!-- error row 2 -->
-                        <div class="tp-row-error">
-                            <div class="tp-col tp-col-4">
-                                <label for="anioCbx" id="fechaLbl" class="warning"></label>
-                            </div>
-                            <div class="tp-col tp-col-4">
-                                <label id="codigoSeguridadLbl" for="codigoSeguridadTxt" class="warning"></label>
-                            </div>
-                        </div>
-                        <!-- row 3 -->
-                        <div class="tp-row">
-                            <input id="nombreTxt" class="tp-input" tabindex="5">
-                        </div>
-                        <!-- error row 3 -->
-                        <div class="tp-row-error">
-                            <label for="nombreTxt" id="nombreLbl" class="warning"></label>
-                        </div>
-                        <!-- row 4 -->
-                        <div class="tp-row">
-                            <select id="promosCbx" class="tp-input"></select>
-                        </div>
-                        <!-- row 5 -->
-                        <div class="tp-row">
-                            <input id="tokenPeiTxt" class="tp-input ">
-                            <label id="tokenPeiLbl" for="tokenPeiTxt" class="warning"></label>
-                        </div>
-                    </div>
-                    <div class="tp-col tp-col-sm-4 tp-col-right">
-                        <!-- row 1 -->
-                        <div class="tp-row">
-                            <div class="tp-col-4">
-                                <select id="medioPagoCbx" class="tp-input "></select>
-                            </div>
-                            <div class="tp-col-4">
-                                <select id="bancoCbx" class="tp-input "></select>
-                            </div>
-                        </div>
-                        <!-- row 2 -->
-                        <div class="tp-row">
-                            <div class="tp-col-2">
-                                <select id="tipoDocCbx" class="tp-input "></select>
-                            </div>
-                            <div class="tp-col-6">
-                                <input id="nroDocTxt" class="tp-input" tabindex="6">
-                            </div>
-                        </div>
-                        <!-- error row 2 -->
-                        <div class="tp-row-error">
-                            <div class="tp-col-2">
-                            </div>
-                            <div class="tp-col-6">
-                                <label for="nroDocTxt" id="nroDocLbl" class="warning"></label>
-                            </div>
-                        </div>
-                        <!-- row 3 -->
-                        <div class="tp-row">
-                            <input id="emailTxt" class="tp-input ">
-                        </div>
-                        <!-- error row 3 -->
-                        <div class="tp-row-error">
-                            <label for="emailTxt" id="emailLbl" class="warning"></label>
-                        </div>
-                        <!-- row 4 -->
-                        <div class="tp-row">
-                            <label id="promosLbl" class="tp-cft" for="promosCbx"></label>
-                        </div>
-                        <!-- row 5-->
-                        <div class="tp-row">
-                            <button id="MY_btnConfirmarPago" class="tp-btn tp-btn-pagar pull-right"></button>
-                        </div>
-                    </div>
+            <div class="tp_col tp_span_2_of_2">
+                <div class="confirmacion">
+                    Al confirmar el pago acepto los <a href="https://www.todopago.com.ar/terminos-y-condiciones-comprador" target="_blank" title="Términos y Condiciones" id="tycId" class="tp_color_text">
+                        Términos
+                        y Condiciones
+                    </a> de Todo Pago.
                 </div>
             </div>
         </div>
-        <!-- row 5 -->
-
+    </section>
+    <div class="tp_row">
+        <div id="tp-powered">
+            Powered by <img id="tp-powered-img" src="catalog/view/theme/default/image/tp_logo_prod.png" />
+        </div>
     </div>
 </div>
 
-<script type="text/javascript">
-    /************* CONFIGURACION DEL API *****************/
 
+
+<script type="text/javascript">
+
+    var medioDePago = document.getElementById('medioPagoCbx');
+    var tarjetaLogo = document.getElementById('tp-tarjeta-logo');
+    var poweredLogo = document.getElementById('tp-powered-img');
+    var numeroTarjetaTxt = document.getElementById('numeroTarjetaTxt')
+    var poweredLogoUrl = "catalog/view/theme/default/image/";
+    var emptyImg = "catalog/view/theme/default/image/empty.png";
+    
+    var switchPei = $("#switch-pei");
+    var sliderText = $("#slider-text");
+
+    var helperCaller = $("#tp-cvv-caller");
+    var helperPopup = $("#tp-cvv-helper");
+
+    var idTarjetas  = {
+        42: 'VISA',
+        43: 'VISAD',
+        1: 'AMEX',
+        2: 'DINERS',
+        6: 'CABAL',
+        7: 'CABALD',
+        14: 'MC',
+        15: 'MCD'
+    };
+
+    var diccionarioTarjetas = {
+        'VISA': 'VISA',
+        'VISA DEBITO': 'VISAD',
+        'AMEX': 'AMEX',
+        'DINERS': 'DINERS',
+        'CABAL': 'CABAL',
+        'CABAL DEBITO': 'CABALD',
+        'MASTER CARD': 'MC',
+        'MASTER CARD DEBITO': 'MCD',
+        'NARANJA': 'NARANJA'
+    };
+
+    /************* HELPERS *************/
+
+    numeroTarjetaTxt.onblur = clearImage;
+
+    function clearImage() {
+        tarjetaLogo.src = emptyImg;
+    }
+
+    function cardImage(select) {
+        var tarjeta = idTarjetas[select.value];
+        if (tarjeta === undefined) {
+            tarjeta = diccionarioTarjetas[select.textContent];
+        }
+        if (tarjeta !== undefined) {
+            tarjetaLogo.src = 'https://forms.todopago.com.ar/formulario/resources/images/' + tarjeta + '.png';
+            tarjetaLogo.style.display = 'block';
+        }
+    }
+
+    /************* CONFIGURACION DEL API *****************/
     function loadScript(url, callback) {
+        var entorno = (url.indexOf('developers') === -1) ? 'prod' : 'developers';
+        console.log(entorno);
+        poweredLogo.src = poweredLogoUrl + 'tp_logo_' + entorno + '.png';
         var script = document.createElement("script");
         script.type = "text/javascript";
-        script.src = url;
-
         if (script.readyState) {  //IE
             script.onreadystatechange = function () {
                 if (script.readyState === "loaded" || script.readyState === "complete") {
@@ -217,34 +346,19 @@
                 window.location.href = "<?php echo $url_second_step.'&Order='.$order_id.'&ResultMessage=' ?>" + "Falló la carga del formulario.";
             }
         }
-
+        script.src = url;
         document.getElementsByTagName("head")[0].appendChild(script);
     }
 
     var formaDePago = document.getElementById("formaPagoCbx");
-    var peiChk = $("#peiCbx");
-
     formaDePago.addEventListener("click", function () {
         if (formaDePago.value === "1") {
             $(".loaded-form").show('fast');
         } else {
             $(".loaded-form").hide('fast');
-            $("#switch-pei").css("display", "none");
+            $("#peibox").css("display", "none");
         }
     });
-    
-    function initialFormaDePago() {
-        if (formaDePago.value === "1") {
-            $(".loaded-form").show('fast');
-        }
-    }
-
-    function desplegarForm() {
-        if (formaDePago.value === "1") {
-            $(formaDePago).hide('fast');
-            $(".loaded-form").show('fast');
-        }
-    }
 
     formaDePago.addEventListener('blur', function () {
         setTimeout(function () {
@@ -252,14 +366,11 @@
         }, 200);
     });
 
-    function getInitialPEIState() {
-        return (peiChk.is(":disabled"));
-    }
-
     function peiLabelLoader() {
         console.log($("#peiCbx").css('display'));
-    }
 
+    }
+    
     function loader(publicRequestKey) {
         $("#loading-hibrid").css("width", "66%");
         setTimeout(function () {
@@ -270,25 +381,10 @@
         }, 1000);
         setTimeout(function () {
             $(".progress").hide('fast');
-            initialFormaDePago();
         }, 1500);
         setTimeout(function () {
-            $("#tp-form").fadeTo('fast', 1);
-            desplegarForm();
+            $("#tpForm").fadeTo('fast', 1);
         }, 1700);
-    }
-
-    function activateSwitch(soloPEI) {
-        console.log("Solo PEI: " + soloPEI);
-        if (!soloPEI) {
-            $("#switch-pei").click(function () {
-                if (!peiChk.prop("checked")) {
-                    peiChk.prop("checked", true);
-                } else {
-                    peiChk.prop("checked", false);
-                }
-            });
-        }
     }
 
     function ignite(publicRequestKey) {
@@ -298,8 +394,8 @@
             callbackBilleteraFunction: 'billeteraPaymentResponse',
             callbackCustomSuccessFunction: 'customPaymentSuccessResponse',
             callbackCustomErrorFunction: 'customPaymentErrorResponse',
-            botonPagarId: 'MY_btnConfirmarPago',
-            botonPagarConBilleteraId: 'MY_btnPagarConBilletera',
+            botonPagarId: 'btn_ConfirmarPago',
+            botonPagarConBilleteraId: 'btn_Billetera',
             modalCssClass: 'modal-class',
             modalContentCssClass: 'modal-content',
             beforeRequest: 'initLoading',
@@ -321,13 +417,19 @@
         console.log("Validando los datos");
         console.log(parametros.field + " -> " + parametros.error);
         var input = parametros.field;
+
+        if (input == 'numeroTarjetaTxt')
+            $("#peibox").css("display", "none");
+
         if (input.search("Txt") !== -1) {
             label = input.replace("Txt", "Lbl");
         } else {
             label = input.replace("Cbx", "Lbl");
         }
-        if (document.getElementById(label) !== null)
-            document.getElementById(label).innerHTML = parametros.error;
+        
+        if (document.getElementById(label) !== null) {
+            document.getElementById(label).innerText = parametros.error;
+        }
     }
 
 
@@ -356,21 +458,78 @@
         }
     }
 
+    // Verifica que el usuario no haya puesto para solo pagar con PEI y actúa en consecuencia
+    function activateSwitch(soloPEI) {
+        readPeiCbx();
+
+        var peiChk = $("#peiCbx");
+
+        console.log("Solo PEI: " + soloPEI);
+        if (!soloPEI) {
+            $("#switch-pei").click(function () {
+                if (!peiChk.prop("checked")) {
+                    switchPei.prop("checked", true);
+                    peiChk.prop("checked", true);
+                    sliderText.text("SÍ");
+                    sliderText.css('transform', 'translateX(0)');
+                } else {
+                    switchPei.prop("checked", false);
+                    peiChk.prop("checked", false);
+                    sliderText.text("NO");
+                    sliderText.css('transform', 'translateX(26px)');
+                }
+            });
+        }
+    }
+
+    function getInitialPEIState() {
+        return ($("#peiCbx").prop("disabled"));
+    }
+
     function initLoading() {
         console.log('Loading...');
+        cardImage(medioDePago);
     }
 
     function stopLoading() {
         console.log('Stop loading...');
         var peiCbx = $("#peiCbx");
-        var rowPei = $("#row-pei");
+        var peiRow = $("#peibox");
+        var tokenPeiTxt = $("#tokenPeiTxt");
+
+        if (document.getElementById('peiLbl').style.display === "inline-block") {
+            $("#peibox").css('display', 'table-cell');
+        } else {
+            $("#peibox").hide("fast");
+            $("#peiCbx").prop("checked", false);
+        }
+
         if (peiCbx.css('display') !== 'none') {
-            rowPei.show('fast');
+            peiRow.show('fast');
             switchPei = $("#switch-pei");
             switchPei.css("display", "block");
             activateSwitch(getInitialPEIState());
         } else {
-            rowPei.css("display", "none");
+            peiRow.hide('fast');
+            peiRow.css("display", "none");
+            $("#peiCbx").prop("checked", false);
         }
     }
+
+    function readPeiCbx() {
+        var peiCbx = $("#peiCbx");
+        if (peiCbx.prop("checked", true)) {
+            switchPei.prop("checked", true);
+            sliderText.text("SÍ");
+            sliderText.css('transform', 'translateX(0)');
+        } else {
+            switchPei.prop("checked", true);
+            sliderText.text("NO");
+            sliderText.css('transform', 'translateX(26px)');
+        }
+    }
+
+    helperCaller.click(function () {
+        helperPopup.toggle(500);
+    });
 </script>

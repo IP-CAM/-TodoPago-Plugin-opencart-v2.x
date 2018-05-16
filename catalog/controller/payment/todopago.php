@@ -28,7 +28,7 @@ class ControllerPaymentTodopago extends Controller
         $data["url_fail_page"] = $this->config->get('config_url') . "index.php?route=" . $this->tp_routes['payment-module'] . "/url_error&Order=" . $this->session->data['order_id'];
 
         if ($data['ambiente'] === 'test')
-            $data['script'] = 'https://devteam.com.ar/hibrido2.js';
+            $data['script'] = 'https://developers.todopago.com.ar/resources/v2/TPBSAForm.min.js';
         else
             $data['script'] = 'https://forms.todopago.com.ar/resources/v2/TPBSAForm.min.js';
 
@@ -47,6 +47,7 @@ class ControllerPaymentTodopago extends Controller
             $data['order_id'] = $order_info['order_id'];
             $data['completeName'] = $order_info['payment_firstname'] . ' ' . $order_info['payment_lastname'];
             $data['mail'] = $order_info['email'];
+            $data['ordertotal'] = $order_info['total'];
 
             $this->model_payment_todopago->editPaymentMethodOrder($data['order_id']);
             if ($data["formulario"] != "hibrid") {
