@@ -1,7 +1,7 @@
 <?php
 $_['heading_title'] = 'Todo Pago';
 $_['text_todopago'] = '<img src="https://todopago.com.ar/sites/todopago.com.ar/files/pluginstarjeta.jpg" style="height:30px; width:150px" alt="Todo Pago" title="Todo Pago" /></a>';
-
+$_['text_todopagobilletera'] = '<img src="https://todopago.com.ar/sites/todopago.com.ar/files/billetera/pluginstarjeta1.jpg" style="height:30px; width:150px" alt="Todo Pago" title="Todo Pago Banner Billetera" /></a>';
 $_['text_enabled'] = 'Enabled';
 $_['text_disabled'] = 'Disabled';
 

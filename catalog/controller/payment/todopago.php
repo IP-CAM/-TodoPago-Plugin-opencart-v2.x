@@ -48,7 +48,7 @@ class ControllerPaymentTodopago extends Controller
             $data['completeName'] = $order_info['payment_firstname'] . ' ' . $order_info['payment_lastname'];
             $data['mail'] = $order_info['email'];
             $data['ordertotal'] = $order_info['total'];
-
+            $data['payment_code'] = $order_info['payment_code'];
             $this->model_payment_todopago->editPaymentMethodOrder($data['order_id']);
             if ($data["formulario"] != "hibrid") {
                 if (VERSION < '2.2.0.0') {

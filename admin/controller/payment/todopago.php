@@ -158,6 +158,10 @@ class ControllerPaymentTodopago extends Controller
                         $this->load->model('setting/setting');
                         $settings['todopago_version'] = TP_VERSION;
                         $this->model_setting_setting->editSetting('todopago', $settings); //Registra en la tabla el nro de Versión a la que se ha actualizado
+                        //guarda registro de banner billetera para ser reconocido en front
+                        //instala BVTP de una vez
+                        $this->db->query("INSERT INTO `".DB_PREFIX."extension` (type, code) SELECT * FROM (SELECT 'payment', 'todopagobilletera') AS tmp WHERE NOT EXISTS (SELECT code FROM `".DB_PREFIX."extension` WHERE code = 'todopagobilletera') LIMIT 1;");
+                        $this->db->query("INSERT INTO `".DB_PREFIX."extension` (type, code) SELECT * FROM (SELECT 'payment', 'todopago') AS tmp WHERE NOT EXISTS (SELECT code FROM `".DB_PREFIX."extension` WHERE code = 'todopago') LIMIT 1;");
                         $this->session->data['success'] = 'Instalación finalizada.';
                     } catch (Exception $e) {
                         $errorMessage = 'Fallo deconocido, se pedirá reintentar';
@@ -213,6 +217,15 @@ class ControllerPaymentTodopago extends Controller
         $this->load->model('payment/todopago');
         $this->load->model('todopago/transaccion_admin');
         $this->load->model('todopago/addressbook_admin');
+        $this->load->model('setting/setting');
+
+        //borrando todopagobilletera y todopago de tabla extension
+        //es necesario borrar ambos por cual sea de los dos hayan hecho la desistalacion
+        $this->db->query("DELETE FROM `".DB_PREFIX."extension` WHERE code = 'todopagobilletera'");
+        $this->db->query("DELETE FROM `".DB_PREFIX."extension` WHERE code = 'todopago'");
+
+        //setea a false BVTP
+        $this->model_setting_setting->editSetting('todopagobilletera', array("todopagobilletera_status"=>false));
 
         if (isset($this->request->post['revert_postcode_required'])) {
             $this->model_payment_todopago->setPostCodeRequired(false);
@@ -263,7 +276,12 @@ class ControllerPaymentTodopago extends Controller
         $this->load->model('todopago/addressbook_admin');
 
         if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validate()) { //Si Viene con datos via post viene con datos del menú de configuracion.
+            $value_status_banner = $this->request->post["todopago_status"];
             $this->model_setting_setting->editSetting('todopago', $this->request->post);
+            //inserto todopagobilletera como clave para que sea reconocido en front
+            $this->model_setting_setting->editSetting('todopagobilletera', array("todopagobilletera_status"=>$value_status_banner));
+            
+            
             if ($this->request->post['upgrade'] == '1') { //Si necesita upgradear llamamos al _install()
                 $this->response->redirect($this->url->link($this->tp_routes['payment-module'] . '/_install', 'action=' . self::UPGRADE . '&token=' . $this->session->data['token'] . '&pluginVersion=' . $this->model_payment_todopago->getVersion(), 'SSL'));
             } else {
@@ -474,6 +492,12 @@ class ControllerPaymentTodopago extends Controller
             $data['todopago_order_status_id_pro'] = $this->request->post['todopago_order_status_id_pro'];
         } else {
             $data['todopago_order_status_id_pro'] = $this->config->get('todopago_order_status_id_pro');
+        }
+
+        if (isset($this->request->post['todopago_bannerbilletera'])) {
+            $data['todopago_bannerbilletera'] = $this->request->post['todopago_bannerbilletera'];
+        } else {
+            $data['todopago_bannerbilletera'] = $this->config->get('todopago_bannerbilletera');
         }
         $this->load->model('localisation/order_status');
         $data['order_statuses'] = $this->model_localisation_order_status->getOrderStatuses();

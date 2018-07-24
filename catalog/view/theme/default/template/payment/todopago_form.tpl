@@ -31,6 +31,7 @@
         $("#comenzar_pago_btn").hide();
         $("#progress").show();
     }
+    var method_payment = '<?php echo $payment_code; ?>';
 </script>
 
 <!-- inicio formulario -->
@@ -73,7 +74,7 @@
         </div>
     </section>
 
-    <section class="billetera_tp">
+    <section class="billetera_tp tpbilletera">
         <div class="tp-row">
             <p>
                 Con tu tarjeta de crédito o débito
@@ -373,6 +374,8 @@
     
     function loader(publicRequestKey) {
         $("#loading-hibrid").css("width", "66%");
+        if(method_payment == "todopagobilletera")
+            $('.tpbilletera').hide();
         setTimeout(function () {
             ignite(publicRequestKey);
         }, 100);
@@ -384,6 +387,8 @@
         }, 1500);
         setTimeout(function () {
             $("#tpForm").fadeTo('fast', 1);
+            if(method_payment == "todopagobilletera")
+                $("#btn_Billetera").click();
         }, 1700);
     }
 

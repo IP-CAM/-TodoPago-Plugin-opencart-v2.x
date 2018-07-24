@@ -150,6 +150,7 @@
                         <div class="tab-pane active" id="tab-general">
                            <input type="hidden" name="upgrade" value="<?php echo $need_upgrade ?>">
                            <input type="hidden" name="todopago_version" value="<?php echo $todopago_version; ?>">
+                           
                             <div class="form-group required">
                                 <label class="col-sm-2 control-label" for="todopago_status">Enabled</label>
                                 <div class="field col-sm-5">
@@ -330,6 +331,24 @@ Valor maximo: 21600000 (6hs))</em>
                                         </option>
                                         <?php } ?>
                                     </select>
+                                </div>
+                            </div>
+
+                            <!-- banner billetera -->
+                            <div class="form-group required">
+                                <label class="col-sm-2 control-label" for="todopago_bannerbilletera">Billetera en Checkout</label>
+                                <div class="field col-sm-5">
+                                    <input checked="checked" type="radio" name="todopago_bannerbilletera" id="todopago_bannerbilletera1" value="https://todopago.com.ar/sites/todopago.com.ar/files/billetera/pluginstarjeta1.jpg"
+                                    <?php echo ($todopago_bannerbilletera == 'https://todopago.com.ar/sites/todopago.com.ar/files/billetera/pluginstarjeta1.jpg') ? 'checked="checked"' : ''; ?> >
+                                    <img src="https://todopago.com.ar/sites/todopago.com.ar/files/billetera/pluginstarjeta1.jpg">
+                                    <br>
+                                    <input type="radio" name="todopago_bannerbilletera" id="todopago_bannerbilletera2" value="https://todopago.com.ar/sites/todopago.com.ar/files/billetera/pluginstarjeta2.jpg" <?php echo ($todopago_bannerbilletera=='https://todopago.com.ar/sites/todopago.com.ar/files/billetera/pluginstarjeta2.jpg' ) ? 'checked="checked"' : ''; ?> >
+                                    <img src="https://todopago.com.ar/sites/todopago.com.ar/files/billetera/pluginstarjeta2.jpg">
+                                    <br>
+                                    <input type="radio" name="todopago_bannerbilletera" id="todopago_bannerbilletera3" value="https://todopago.com.ar/sites/todopago.com.ar/files/billetera/pluginstarjeta3.jpg" <?php echo ($todopago_bannerbilletera=='https://todopago.com.ar/sites/todopago.com.ar/files/billetera/pluginstarjeta3.jpg' ) ? 'checked="checked"' : ''; ?> >
+                                    <img src="https://todopago.com.ar/sites/todopago.com.ar/files/billetera/pluginstarjeta3.jpg">
+                                </div>
+                                <div class="info-field col-sm-5"><em>Seleccione el banner que desea mostrar para billetera.</em>
                                 </div>
                             </div>
 
@@ -805,5 +824,5 @@ modal.open();
             }
 
         });
-
+        
         </script>
